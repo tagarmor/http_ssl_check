@@ -440,6 +440,9 @@ def run_scan_in_thread(
             "current": entry["original"],
         }))
 
+    # Ensure reports directory exists (may have been deleted after startup)
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
     # Write CSV report
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
@@ -639,6 +642,9 @@ def run_legacy():
     ts           = datetime.now().strftime("%Y%m%d%H%M%S")
     csv_filename = f"report_http_ssl_{ts}.csv"
     csv_path     = REPORTS_DIR / csv_filename
+
+    # Ensure reports directory exists (may have been deleted after startup)
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
