@@ -1046,11 +1046,11 @@ async function checkSvr(){
 /* ══ EXPORT ═══════════════════════════════════ */
 function exportCSV(){
   if(!curCsv){alert('No CSV data available.');return;}
-  const ts=new Date().toISOString().slice(0,19).replace(/[-T:]/g,'').slice(0,14);
-  const fn=window.prompt(t('exp_prompt'),'reports/report_http_ssl_'+ts+'.csv');
-  if(!fn)return;
+  const ts=new Date().toISOString().replace(/[-T:]/g,'').slice(0,14);
   const blob=new Blob([curCsv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fn.split('/').pop();a.click();URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='report_http_ssl_'+ts+'.csv';
+  a.click();URL.revokeObjectURL(url);
 }
 function exportPDF(){window.print();}
 
