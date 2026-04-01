@@ -1,0 +1,61 @@
+hostname,https_active,error_type,https_status_code,https_status_text,ssl_issuer,ssl_common_name,ssl_valid_from,ssl_valid_until,ssl_key_algorithm,ssl_key_size_bits,ssl_cipher_suite,tls_version
+portal.acme-corp.com,TRUE,,200,OK,DigiCert Global CA G2,portal.acme-corp.com,2026-01-30,2027-01-30,RSA,4096,TLS_AES_256_GCM_SHA384,TLSv1.3
+api.acme-corp.com,TRUE,,200,OK,Let's Encrypt R3,api.acme-corp.com,2026-02-14,2027-02-14,EC,384,TLS_AES_128_GCM_SHA256,TLSv1.3
+shop.globalretail.net,TRUE,,200,OK,Sectigo RSA CA,shop.globalretail.net,2026-03-01,2027-03-01,RSA,2048,TLS_CHACHA20_POLY1305_SHA256,TLSv1.3
+intranet.bigbank.io,TRUE,,200,OK,Entrust CA L1K,intranet.bigbank.io,2025-12-31,2026-12-31,RSA,4096,TLS_AES_256_GCM_SHA384,TLSv1.3
+secure.healthportal.org,TRUE,,200,OK,GlobalSign GCC R6,secure.healthportal.org,2026-03-16,2027-03-16,EC,256,TLS_AES_256_GCM_SHA384,TLSv1.3
+vpn.enterprise-hq.com,TRUE,,200,OK,Comodo CA Ltd,vpn.enterprise-hq.com,2026-03-11,2027-03-11,RSA,3072,TLS_AES_128_GCM_SHA256,TLSv1.3
+dashboard.saasplatform.io,TRUE,,200,OK,Amazon Root CA 1,dashboard.saasplatform.io,2026-03-21,2027-03-21,EC,384,TLS_CHACHA20_POLY1305_SHA256,TLSv1.3
+erp.manufacturing-co.com,TRUE,,200,OK,DigiCert TLS CA,erp.manufacturing-co.com,2026-01-10,2027-01-10,RSA,2048,TLS_AES_256_GCM_SHA384,TLSv1.3
+auth.cloudsvc.net,TRUE,,200,OK,Let's Encrypt R3,auth.cloudsvc.net,2026-03-26,2027-03-26,EC,256,TLS_AES_128_GCM_SHA256,TLSv1.3
+mail.corporategroup.com,TRUE,,200,OK,Sectigo ECC CA,mail.corporategroup.com,2026-02-19,2027-02-19,EC,384,TLS_AES_256_GCM_SHA384,TLSv1.3
+legacy-app.intranet.local,TRUE,,200,OK,Internal CA v2,legacy-app.intranet.local,2025-12-21,2026-12-21,RSA,2048,ECDHE-RSA-AES256-GCM-SHA384,TLSv1.2
+crm.salesforce-mirror.com,TRUE,,200,OK,DigiCert Global CA,crm.salesforce-mirror.com,2026-02-04,2027-02-04,RSA,2048,ECDHE-RSA-AES128-GCM-SHA256,TLSv1.2
+reporting.bi-platform.net,TRUE,,200,OK,GlobalSign CA,reporting.bi-platform.net,2026-01-20,2027-01-20,EC,256,ECDHE-ECDSA-AES256-GCM-SHA384,TLSv1.2
+files.docmgmt-sys.com,TRUE,,200,OK,Entrust CA G4,files.docmgmt-sys.com,2026-03-06,2027-03-06,RSA,2048,ECDHE-RSA-AES256-GCM-SHA384,TLSv1.2
+payments.fintech-app.io,TRUE,,200,OK,Comodo DV CA,payments.fintech-app.io,2026-02-24,2027-02-24,RSA,4096,ECDHE-RSA-AES128-GCM-SHA256,TLSv1.2
+webmail.corp-internal.com,TRUE,,200,OK,Let's Encrypt R3,webmail.corp-internal.com,2025-04-30,2026-04-25,RSA,2048,TLS_AES_256_GCM_SHA384,TLSv1.3
+monitor.opsplatform.net,TRUE,,200,OK,ZeroSSL CA,monitor.opsplatform.net,2025-04-15,2026-04-15,EC,256,TLS_AES_128_GCM_SHA256,TLSv1.3
+staging.webapp-dev.io,TRUE,,200,OK,Let's Encrypt R3,staging.webapp-dev.io,2025-04-05,2026-04-05,RSA,2048,TLS_CHACHA20_POLY1305_SHA256,TLSv1.3
+wiki.internal-tools.com,TRUE,,200,OK,Sectigo RSA CA,wiki.internal-tools.com,2025-05-25,2026-05-25,RSA,2048,ECDHE-RSA-AES256-GCM-SHA384,TLSv1.2
+git.devops-platform.net,TRUE,,200,OK,DigiCert TLS CA,git.devops-platform.net,2025-05-30,2026-05-30,EC,384,TLS_AES_256_GCM_SHA384,TLSv1.3
+jira.internal-tools.com,TRUE,,200,OK,Let's Encrypt R3,jira.internal-tools.com,2025-05-20,2026-05-20,RSA,2048,ECDHE-RSA-AES128-GCM-SHA256,TLSv1.2
+confluence.devteam.io,TRUE,,200,OK,GlobalSign CA,confluence.devteam.io,2025-05-15,2026-05-15,RSA,4096,TLS_AES_128_GCM_SHA256,TLSv1.3
+old-portal.legacy-sys.com,TRUE,,200,OK,VeriSign Class 3 CA,old-portal.legacy-sys.com,2024-03-31,2026-03-26,RSA,2048,ECDHE-RSA-AES256-GCM-SHA384,TLSv1.2
+archive.corp-intranet.net,TRUE,,200,OK,Thawte SSL CA,archive.corp-intranet.net,2024-03-31,2026-03-01,RSA,2048,ECDHE-RSA-AES128-GCM-SHA256,TLSv1.2
+api-v1.deprecated-svc.io,TRUE,,200,OK,Let's Encrypt R3,api-v1.deprecated-svc.io,2025-12-21,2026-03-21,EC,256,TLS_AES_256_GCM_SHA384,TLSv1.3
+reports.old-bi-tool.com,TRUE,,200,OK,DigiCert Global CA,reports.old-bi-tool.com,2024-01-21,2026-01-30,RSA,2048,ECDHE-RSA-AES256-SHA384,TLSv1.2
+erp-legacy.manufact.com,TRUE,,200,OK,VeriSign CA G3,erp-legacy.manufact.com,2025-02-24,2026-10-17,RSA,2048,AES256-SHA,TLSv1.0
+hr-portal.oldcorp.net,TRUE,,200,OK,Thawte SGC CA,hr-portal.oldcorp.net,2024-11-16,2026-07-09,RSA,2048,AES128-SHA,TLSv1.0
+payroll.legacyerp.local,TRUE,,200,OK,Internal CA v1,payroll.legacyerp.local,2024-08-08,2026-05-20,RSA,1024,RC4-SHA,TLSv1.0
+sap-web.factory-sys.com,TRUE,,200,OK,Comodo CA Ltd,sap-web.factory-sys.com,2025-03-31,2026-09-27,RSA,2048,DES-CBC3-SHA,TLSv1.1
+scada.industrial-net.local,TRUE,,200,OK,Internal CA v1,scada.industrial-net.local,2024-04-30,2026-06-19,RSA,1024,AES128-SHA,TLSv1.1
+iot-gateway.factory.local,TRUE,,200,OK,Self-Signed,iot-gateway.factory.local,2024-03-31,2027-03-31,RSA,512,RC4-MD5,SSLv3
+ftp-web.fileshare-old.com,TRUE,,200,OK,Thawte SSL CA,ftp-web.fileshare-old.com,2024-11-16,2026-10-17,RSA,1024,ECDHE-RSA-AES256-SHA,TLSv1.2
+cms.legacy-marketing.net,TRUE,,200,OK,GeoTrust SSL CA,cms.legacy-marketing.net,2025-02-24,2026-12-06,RSA,512,ECDHE-RSA-AES128-SHA256,TLSv1.2
+vpn2.remote-access.corp,TRUE,,200,OK,Internal CA v1,vpn2.remote-access.corp,2025-06-04,2027-01-25,DSA,1024,DHE-DSS-AES256-SHA,TLSv1.2
+backup-web.datastore.local,TRUE,,200,OK,Internal CA v1,backup-web.datastore.local,2025-09-12,2027-05-05,DSA,2048,DHE-DSS-AES128-SHA256,TLSv1.2
+mgmt.embedded-device.local,TRUE,,200,OK,Self-Signed,mgmt.embedded-device.local,2024-03-31,2028-03-30,RSA,512,AES128-SHA,TLSv1.1
+intranet.oldoffice.corp,TRUE,,200,OK,VeriSign CA G2,intranet.oldoffice.corp,2024-08-08,2026-07-09,RSA,2048,RC4-SHA,TLSv1.2
+webdav.collab-old.net,TRUE,,200,OK,Thawte SSL CA,webdav.collab-old.net,2024-11-16,2026-10-17,RSA,2048,RC4-MD5,TLSv1.2
+sharepoint.legacy-ms.local,TRUE,,200,OK,Internal CA v1,sharepoint.legacy-ms.local,2025-02-24,2027-01-25,RSA,2048,DES-CBC3-SHA,TLSv1.2
+exchange.legacy-ms.local,TRUE,,200,OK,Internal CA v1,exchange.legacy-ms.local,2025-03-31,2027-03-31,RSA,2048,DES-CBC-SHA,TLSv1.2
+proxy.datacenter-old.com,TRUE,,200,OK,GeoTrust CA,proxy.datacenter-old.com,2025-06-04,2026-12-06,RSA,2048,EXPORT-RC4-MD5,TLSv1.0
+wap.mobile-gw.legacy.net,TRUE,,200,OK,Comodo CA Ltd,wap.mobile-gw.legacy.net,2025-01-05,2026-07-09,RSA,2048,ADH-AES256-SHA,TLSv1.1
+xmlrpc.integration-old.com,TRUE,,200,OK,DigiCert CA,xmlrpc.integration-old.com,2025-09-12,2027-01-25,RSA,2048,ECDHE-RSA-AES256-SHA,TLSv1.2
+api-gw.legacy-backend.net,TRUE,,200,OK,GlobalSign CA,api-gw.legacy-backend.net,2025-10-02,2026-09-27,RSA,2048,AES256-SHA,TLSv1.2
+192.168.10.45,FALSE,CONNECTION_REFUSED,,,,,,,,,,
+10.0.5.200:8443,FALSE,CONNECTION_REFUSED,,,,,,,,,,
+server-decommissioned.corp,FALSE,DNS_ERROR,,,,,,,,,,
+old-api.defunct-startup.io,FALSE,DNS_ERROR,,,,,,,,,,
+slowsvc.overloaded-dc.net,FALSE,TIMEOUT,,,,,,,,,,
+firewall-blocked.internal,FALSE,CONNECTION_REFUSED,,,,,,,,,,
+172.16.30.100:443,FALSE,CONNECTION_REFUSED,,,,,,,,,,
+test-node.offline-lab.local,FALSE,CONNECTION_REFUSED,,,,,,,,,,
+maintenance.webapp.com,TRUE,,503,Service Unavailable,Let's Encrypt R3,maintenance.webapp.com,2026-02-09,2027-02-09,EC,256,TLS_AES_256_GCM_SHA384,TLSv1.3
+restricted.internal-app.net,TRUE,,403,Forbidden,DigiCert TLS CA,restricted.internal-app.net,2026-03-01,2027-03-01,RSA,2048,TLS_AES_128_GCM_SHA256,TLSv1.3
+redirect-svc.cloud-app.io,TRUE,,301,Moved Permanently,Amazon Root CA 1,redirect-svc.cloud-app.io,2026-03-11,2027-03-11,EC,384,TLS_AES_256_GCM_SHA384,TLSv1.3
+dev.staging-env.net,TRUE,,404,Not Found,Let's Encrypt R3,dev.staging-env.net,2026-03-21,2027-03-21,RSA,2048,TLS_CHACHA20_POLY1305_SHA256,TLSv1.3
+broken-tls.legacy-app.local,FALSE,SSL_ERROR,,,,,,,,,,
+selfsigned-no-sni.dev.local,FALSE,SSL_ERROR,,,,,,,,,,
+nexus.artifact-repo.io,TRUE,,200,OK,Let s Encrypt R3,nexus.artifact-repo.io,2026-02-09,2027-02-09,RSA,2048,TLS_AES_256_GCM_SHA384,TLSv1.3
