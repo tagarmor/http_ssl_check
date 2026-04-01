@@ -18,7 +18,7 @@ Supported input formats (one entry per line; lines starting with # are ignored):
   hostname:port/path        example.com:8443/login
   https://...               any of the above prefixed with https://
 
-Output:  report_https_ssl_YYYYMMDDhhmmss.csv  (filename uses local time)
+Output:  reporte_https_ssl_YYYYMMDDhhmmss.csv  (filename uses local time)
 
 Required third-party packages:
   pip install requests cryptography urllib3
@@ -451,9 +451,9 @@ def process_entry(idx: int, total: int, entry: dict) -> dict:
     cipher   = ssl_info.get("ssl_cipher_suite", "")
 
     if tls_ver:
-        print(f"        {_ok(f'TLS   handshake OK  [{tls_ver}  {cipher}]')}")
+        print(f"        {_ok(f'TLS   handshake OK  [{tls_ver}]')}")
 
-        # Build the certificate summary line using temporary variables to avoid
+        # Extract all certificate fields into temporary variables to avoid
         # nested f-string quoting issues (SyntaxError in Python < 3.12).
         cn   = ssl_info.get("ssl_common_name", "")
         iss  = ssl_info.get("ssl_issuer", "")
@@ -461,8 +461,17 @@ def process_entry(idx: int, total: int, entry: dict) -> dict:
         til  = ssl_info.get("ssl_valid_until", "")
         algo = ssl_info.get("ssl_key_algorithm", "")
         bits = ssl_info.get("ssl_key_size_bits", "")
-        cert_summary = f"CN={cn}  Issuer={iss}  Valid={frm} / {til}  {algo} {bits} bits"
+
+        # Line 1 — certificate identity and validity dates
+        cert_summary = f"CN={cn}  Issuer={iss}  Valid={frm} / {til}"
         print(f"        {_ok(f'CERT  {cert_summary}')}")
+
+        # Line 2 — public key algorithm and size
+        key_summary = f"{algo} {bits} bits"
+        print(f"        {_ok(f'KEY   {key_summary}')}")
+
+        # Line 3 — negotiated cipher suite
+        print(f"        {_ok(f'CIPH  {cipher}')}")
     else:
         print(f"        {_fail('TLS   handshake failed')}")
 
@@ -550,9 +559,17 @@ def main() -> None:
     print(f"\n  Loaded {BOLD}{total}{RESET} target(s) from '{filepath}'")
     print(f"  cryptography {crypto_version}  |  UTC-aware date fields: {USE_UTC_FIELDS}")
 
+    # ── Prepare the ./reports/ output directory ───────────────────────────────
+    reports_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
+    if not os.path.isdir(reports_dir):
+        os.makedirs(reports_dir)
+        print(f"  Directory created: {BOLD}{reports_dir}{RESET}")
+    else:
+        print(f"  Output directory:  {BOLD}{reports_dir}{RESET}")
+
     # ── Prepare the output CSV filename using local time ───────────────────────
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    out_file  = f"report_http_ssl_{timestamp}.csv"
+    out_file  = os.path.join(reports_dir, f"report_http_ssl_{timestamp}.csv")
 
     # CSV column order — matches the spec exactly
     fieldnames = [

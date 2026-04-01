@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTTPS / SSL Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root,[data-theme="dark"]{--bg:#080c12;--bg2:#0d1118;--card:#111620;--card2:#161c28;--border:#1e2535;--border2:#252d40;--text:#d4dce8;--text-bright:#eef2f8;--muted:#4a566a;--muted2:#6b7a8d;--hdr:linear-gradient(180deg,#0b1120,#080c12);--inp:#0d1118;--shadow:0 4px 24px rgba(0,0,0,.5);--gl:#1e2535;--tc:#4a566a;--tc2:#6b7a8d;--scr:#252d40}
+[data-theme="light"]{--bg:#f0f4f9;--bg2:#e4eaf3;--card:#fff;--card2:#f4f7fc;--border:#d0daea;--border2:#b8c8df;--text:#2c3a50;--text-bright:#111827;--muted:#8fa0ba;--muted2:#6b7f98;--hdr:linear-gradient(180deg,#fff,#f0f4f9);--inp:#e4eaf3;--shadow:0 4px 24px rgba(0,0,0,.10);--gl:#d8e4f0;--tc:#8fa0ba;--tc2:#6b7f98;--scr:#b8c8df}
+:root{--teal:#00e5c3;--td:rgba(0,229,195,.12);--blue:#3b9eff;--bd:rgba(59,158,255,.12);--red:#ff4d6a;--rd:rgba(255,77,106,.12);--orange:#ff8c42;--od:rgba(255,140,66,.12);--green:#2dde98;--gd:rgba(45,222,152,.12);--violet:#a78bfa;--yellow:#fbbf24;--r:10px;--rl:16px;--mono:'JetBrains Mono','Segoe UI Mono',monospace;--sans:'Syne','Segoe UI',system-ui,sans-serif;--kpi:'Segoe UI',system-ui,sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--scr);border-radius:3px}
+.header{background:var(--hdr);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;gap:8px;box-shadow:var(--shadow);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.brand-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.brand-title{font-size:15px;font-weight:800;color:var(--text-bright);letter-spacing:-.3px}
+.brand-sub{font-size:10px;color:var(--muted2);font-family:var(--mono)}
+.hdr-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.svr-pill{display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--mono);color:var(--muted2);padding:4px 8px;border-radius:6px;background:var(--card);border:1px solid var(--border)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .4s,box-shadow .4s;flex-shrink:0}
+.dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}.dot.off{background:var(--red)}.dot.chk{background:var(--yellow);animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.fbadge{display:none;background:var(--td);border:1px solid rgba(0,229,195,.25);color:var(--teal);border-radius:6px;padding:4px 8px;font-size:10px;font-family:var(--mono);max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ibtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--muted2);cursor:pointer;font-size:14px;transition:border-color .15s,color .15s}
+.ibtn:hover{border-color:var(--teal);color:var(--teal)}
+.btn{display:inline-flex;align-items:center;gap:4px;border:none;border-radius:7px;padding:5px 11px;font-size:11px;font-weight:700;font-family:var(--sans);cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap}
+.btn:hover{opacity:.87;transform:translateY(-1px)}.btn:active{transform:translateY(0)}
+.btn-primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:#060a10}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border2)}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border)}
+.btn-danger{background:var(--rd);color:var(--red);border:1px solid rgba(255,77,106,.3)}
+.btn-export{background:rgba(59,158,255,.12);color:var(--blue);border:1px solid rgba(59,158,255,.3)}
+.btn-pdf{background:rgba(249,115,22,.12);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
+.btn-sm{padding:4px 8px;font-size:10px}
+.lang-tgl{display:flex;background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.lang-opt{padding:4px 8px;font-size:10px;font-weight:700;font-family:var(--mono);cursor:pointer;color:var(--muted2);transition:background .15s,color .15s;user-select:none}
+.lang-opt.act{background:var(--td);color:var(--teal)}
+#fbar{display:none;position:sticky;top:56px;z-index:190;background:var(--bg2);border-bottom:1px solid var(--border);padding:5px 18px;align-items:center;gap:6px;flex-wrap:wrap}
+#fbar.show{display:flex}
+#fbar-label{font-size:10px;font-family:var(--mono);color:var(--muted2);flex-shrink:0}
+#fchips{display:flex;flex-wrap:wrap;gap:4px;align-items:center;flex:1}
+.fchip{display:inline-flex;align-items:center;gap:3px;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;font-family:var(--mono);border:1px solid rgba(0,229,195,.4);background:rgba(0,229,195,.1);color:var(--teal)}
+.fchip.kpi{border-color:rgba(59,158,255,.4);background:rgba(59,158,255,.1);color:var(--blue)}
+.fchip.tbl{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.1);color:var(--violet)}
+.fx{cursor:pointer;opacity:.7;font-size:11px;line-height:1}.fx:hover{opacity:1}
+#landing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 56px);padding:30px 20px}
+.l-inner{width:100%;max-width:640px;display:flex;flex-direction:column;gap:13px}
+.l-title{font-size:24px;font-weight:800;color:var(--text-bright);letter-spacing:-1px;line-height:1.1;text-align:center}
+.l-title span{color:var(--teal)}
+.l-sub{text-align:center;font-size:12px;color:var(--muted2);line-height:1.6}
+.mtabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:4px}
+.mtab{flex:1;text-align:center;padding:7px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;transition:background .2s,color .2s;color:var(--muted2);user-select:none}
+.mtab.act{background:var(--card2);color:var(--text-bright);border:1px solid var(--border2)}
+.mpanel{display:none;flex-direction:column;gap:10px}.mpanel.show{display:flex}
+.pbox{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px;display:flex;flex-direction:column;gap:11px}
+.plbl{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.8px}
+.dropz{border:2px dashed var(--border2);border-radius:var(--r);padding:22px 16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
+.dropz:hover,.dropz.over{border-color:var(--teal);background:var(--td)}
+.dropz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.di{font-size:24px;margin-bottom:6px}.dt{font-size:13px;font-weight:700;color:var(--text-bright)}.ds{font-size:11px;color:var(--muted2);margin-top:3px}
+.dfn{font-size:11px;font-family:var(--mono);color:var(--teal);margin-top:5px;font-weight:600;display:none}
+textarea.sta{width:100%;min-height:120px;max-height:220px;resize:vertical;background:var(--inp);border:1px solid var(--border2);border-radius:var(--r);color:var(--text-bright);font-family:var(--mono);font-size:11px;padding:10px 12px;outline:none;line-height:1.7;transition:border-color .2s}
+textarea.sta:focus{border-color:var(--teal)}textarea.sta::placeholder{color:var(--muted)}
+.swarn{display:none;background:var(--od);border:1px solid rgba(255,140,66,.35);border-radius:var(--r);padding:10px 12px;font-size:11px;color:var(--orange);line-height:1.7}
+.swarn code{font-family:var(--mono);background:rgba(0,0,0,.2);border-radius:4px;padding:1px 5px}
+.swarn.show{display:block}
+.sp{display:none;flex-direction:column;gap:7px}.sp.show{display:flex}
+.sph{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-family:var(--mono);color:var(--muted2)}
+.pbw{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.pbf{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:3px;width:0%;transition:width .4s ease}
+.pcnt{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.dc{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 13px;display:none;flex-direction:column;gap:5px}
+.dc.show{display:flex}
+.dc-host{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text-bright)}
+.dc-checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.dck{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600}
+.dck-ok{background:var(--gd);color:var(--green)}.dck-fail{background:var(--rd);color:var(--red)}
+.dck-info{background:var(--bd);color:var(--blue)}.dck-cert{background:var(--td);color:var(--teal)}
+.dck-wait{background:rgba(107,122,141,.15);color:var(--muted2)}
+.lbox{background:#0a0e16;border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;font-family:var(--mono);font-size:10.5px;color:#8899aa;max-height:340px;overflow-y:auto;line-height:1.75}
+.lbox div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.lok{color:#2dde98}.lfail{color:#ff4d6a}.linfo{color:#3b9eff}.lwarn{color:#ff8c42}.lcert{color:#00e5c3}.lhead{color:#eef2f8;font-weight:700}.lmuted{color:#4a566a}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal.show{opacity:1;pointer-events:all}
+.mbox{background:var(--card);border:1px solid var(--border2);border-radius:var(--rl);padding:28px 32px;max-width:480px;width:92%;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:0 8px 48px rgba(0,0,0,.5);transform:translateY(-16px);transition:transform .3s}
+.modal.show .mbox{transform:translateY(0)}
+.micon{font-size:40px}.mtitle{font-size:18px;font-weight:800;color:var(--text-bright)}.msub{font-size:12px;color:var(--muted2);line-height:1.6}
+.mstats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.mstat{display:flex;flex-direction:column;align-items:center;gap:2px}
+.msv{font-size:26px;font-weight:700;font-family:var(--kpi)}.msl{font-size:10px;font-family:var(--mono);color:var(--muted2)}
+.macts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#dash{display:none;padding:14px 18px 0}
+.dtbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.dfi{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);color:var(--muted2)}
+.dfi strong{color:var(--teal)}
+.eslider-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;margin-bottom:11px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.eslider-bar label{font-size:10px;font-weight:700;color:var(--muted2);font-family:var(--mono);white-space:nowrap;flex-shrink:0}
+.sl-wrap{display:flex;align-items:center;gap:7px;flex:1;min-width:160px}
+.sl-wrap input[type=range]{flex:1;height:4px;accent-color:var(--orange);cursor:pointer}
+.slval{font-size:12px;font-weight:800;color:var(--orange);font-family:var(--kpi);min-width:38px;text-align:center;background:var(--od);border:1px solid rgba(255,140,66,.3);border-radius:5px;padding:2px 6px}
+.slhint{font-size:10px;color:var(--muted);font-family:var(--mono);flex:1;min-width:120px}
+.kgrid{display:grid;grid-template-columns:repeat(9,1fr);gap:9px;margin-bottom:11px}
+.kcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px 13px 11px;cursor:pointer;transition:transform .15s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden;user-select:none}
+.kcard:hover{transform:translateY(-2px);border-color:var(--border2)}
+.kcard.act{box-shadow:0 0 0 1.5px var(--acc,var(--teal));border-color:var(--acc,var(--teal))}
+.kcard.act .kval{text-shadow:0 0 18px var(--acc,var(--teal))}
+.kbar{position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0}
+.klbl{font-size:10px;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.kval{font-size:30px;font-weight:700;margin:5px 0 2px;line-height:1;color:var(--text-bright);font-family:var(--kpi)}
+.ksub{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.cblock{background:var(--card);border:2px solid var(--border2);border-radius:var(--rl);padding:18px 20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.cblock-sep{margin:14px 0;border-top:2px solid var(--border2)}
+.cmain{display:flex;align-items:flex-start;gap:13px}
+.cbadge{flex-shrink:0;width:44px;height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;font-family:var(--kpi)}
+.ga{background:var(--gd);color:var(--green);border:1px solid rgba(45,222,152,.3)}.gb{background:var(--td);color:var(--teal);border:1px solid rgba(0,229,195,.3)}
+.gc{background:var(--od);color:var(--orange);border:1px solid rgba(255,140,66,.3)}.gd{background:var(--rd);color:var(--red);border:1px solid rgba(255,77,106,.3)}
+.cbody{flex:1;min-width:0}
+.ctitle{font-size:12px;font-weight:700;color:var(--text-bright);margin-bottom:3px}
+.ctext{font-size:11px;color:var(--text);line-height:1.65}
+.cpills{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.cp{display:inline-flex;align-items:center;gap:3px;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700}
+.cp-ok{background:var(--gd);color:var(--green);border:1px solid rgba(45,222,152,.25)}.cp-w{background:var(--od);color:var(--orange);border:1px solid rgba(255,140,66,.25)}
+.cp-b{background:var(--rd);color:var(--red);border:1px solid rgba(255,77,106,.25)}.cp-i{background:var(--bd);color:var(--blue);border:1px solid rgba(59,158,255,.25)}
+.cdetail{margin-top:11px;padding-top:11px;border-top:1px solid var(--border)}
+.cdetail-section{margin-bottom:10px}
+.cdetail-divider{height:1px;background:var(--border);margin:12px 0}
+
+/* Grade threshold grid */
+.gt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.gt-row{display:flex;align-items:flex-start;gap:8px}
+.gt-row-d{opacity:.85}
+.gt-badge{flex-shrink:0;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:var(--kpi);margin-top:2px}
+.ga-sm{background:var(--gd);color:var(--green);border:1px solid rgba(45,222,152,.3)}
+.gb-sm{background:var(--td);color:var(--teal);border:1px solid rgba(0,229,195,.3)}
+.gc-sm{background:var(--od);color:var(--orange);border:1px solid rgba(255,140,66,.3)}
+.gd-sm{background:var(--rd);color:var(--red);border:1px solid rgba(255,77,106,.3)}
+.gt-info{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.gt-row-header{display:flex;justify-content:space-between;align-items:center}
+.gt-val{font-size:11px!important;font-weight:800!important;font-family:var(--kpi)!important}
+.gt-hint{font-size:9px;font-family:var(--mono);color:var(--muted)}
+.gt-err{font-size:10px;font-family:var(--mono);color:var(--red);background:var(--rd);border:1px solid rgba(255,77,106,.3);border-radius:5px;padding:4px 8px;margin-top:6px}
+
+/* Weight slider metric hint */
+.ws-metric{font-size:9px;font-family:var(--mono);color:var(--muted);min-height:12px;display:block}
+.frow{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.flbl{font-size:10px;color:var(--muted2);font-family:var(--mono);flex-shrink:0;white-space:nowrap}
+.feq{font-size:10px;font-family:var(--mono);color:var(--muted);flex:1}
+.wgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.ws{display:flex;flex-direction:column;gap:4px}
+.wsh{display:flex;justify-content:space-between;align-items:center}
+.wslbl{font-size:10px;font-weight:700;color:var(--muted2);font-family:var(--mono)}.wsv{font-size:11px;font-weight:800;font-family:var(--kpi)}
+.ws input[type=range]{width:100%;height:4px;cursor:pointer}
+.ws:nth-child(1) input{accent-color:var(--blue)}.ws:nth-child(2) input{accent-color:var(--green)}.ws:nth-child(3) input{accent-color:var(--orange)}
+.wsum{font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:4px}.wsum.bad{color:var(--red)}
+.wreset{display:flex;align-items:center;justify-content:flex-end;margin-top:6px}
+.cr1{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.cr2{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px}
+.cr3{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:10px}
+.cc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;transition:border-color .2s,background .25s}
+.cc.ca{border-color:rgba(0,229,195,.6);box-shadow:0 0 0 1px rgba(0,229,195,.12)}
+.cct{font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:4px}
+.chtag{font-size:9px;background:var(--td);color:var(--teal);border:1px solid rgba(0,229,195,.3);border-radius:3px;padding:1px 5px;font-family:var(--mono);display:none}
+.cc.ca .chtag{display:inline}
+.chint{font-size:10px;color:var(--muted);margin-left:auto;font-family:var(--mono)}
+.cw{position:relative;cursor:pointer}
+.h180{height:180px}.h200{height:200px}.h220{height:220px}.h260{height:260px}
+.thead2{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:6px;flex-wrap:wrap}
+.ttitle{font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px}
+.si{background:var(--inp);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:5px 9px;font-size:11px;font-family:var(--mono);width:170px;outline:none;transition:border-color .2s}
+.si:focus{border-color:var(--teal)}
+.tsc{max-height:270px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{position:sticky;top:0;background:var(--card2);padding:7px 8px;text-align:left;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;user-select:none;font-family:var(--mono);transition:background .25s}
+thead th.so{cursor:pointer}thead th.so:hover{color:var(--text)}
+thead th.sa::after{content:' ▲';opacity:.7;font-size:9px}thead th.sd::after{content:' ▼';opacity:.7;font-size:9px}
+thead th.tc2{cursor:pointer}thead th.tc2::after{content:' ↕';opacity:.3;font-size:9px}thead th.tc2:hover{color:var(--text)}
+tbody tr{border-bottom:1px solid rgba(30,37,53,.5);transition:background .1s}
+[data-theme="light"] tbody tr{border-bottom:1px solid rgba(208,218,234,.6)}
+tbody tr:hover{background:rgba(255,255,255,.025)}[data-theme="light"] tbody tr:hover{background:rgba(0,0,0,.025)}
+tbody tr.rsel{background:rgba(0,229,195,.04)!important}
+td{padding:6px 8px;vertical-align:middle}
+td.dom{font-family:var(--mono);font-size:11px;max-width:155px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;color:var(--text-bright)}
+td.tc2{cursor:pointer}td.tc2.on .pill{box-shadow:0 0 0 1.5px currentColor}td.tc2.on{background:rgba(167,139,250,.06)}
+.pill{display:inline-block;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;font-family:var(--mono)}
+.p-ok{background:var(--gd);color:var(--green)}.p-bad{background:var(--rd);color:var(--red)}.p-warn{background:var(--od);color:var(--orange)}
+.p-y{background:var(--td);color:var(--teal)}.p-n{background:var(--rd);color:var(--red)}
+.pb{display:flex;align-items:center;gap:5px;min-width:90px}
+.pbo{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.pbi{height:100%;border-radius:3px;transition:width .4s}
+.pbn{font-size:10px;font-family:var(--mono);width:30px;text-align:right;white-space:nowrap}
+.tctr{margin-top:6px;padding:5px 9px;background:var(--card2);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted2);font-family:var(--mono);transition:background .25s}
+.tpct{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.pg-btns{display:flex;gap:3px;flex-wrap:wrap}
+.pg-btn{padding:2px 7px;font-size:10px;font-family:var(--mono);font-weight:700;cursor:pointer;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--muted2);transition:background .15s,color .15s}
+.pg-btn.act{background:var(--td);color:var(--teal);border-color:rgba(0,229,195,.4)}
+.pg-nav-btn{padding:2px 8px;font-size:10px;font-family:var(--mono);font-weight:700;cursor:pointer;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--muted2);transition:background .15s,color .15s;min-width:28px;text-align:center}
+.pg-nav-btn:hover{border-color:var(--teal);color:var(--teal)}
+.pg-nav-btn.act{background:var(--td);color:var(--teal);border-color:rgba(0,229,195,.4)}
+.pg-nav-btn:disabled{opacity:.35;cursor:default}
+.vuln-row{background:rgba(255,77,106,.07)!important}
+.tsc{overflow-y:auto}
+.vuln-legend{margin-top:7px;padding:6px 8px;background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.2);border-radius:6px;font-size:9px;font-family:var(--mono);color:var(--muted2);line-height:1.8}
+.vuln-legend strong{color:var(--red);font-weight:700;display:block;margin-bottom:2px;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+.footer{text-align:center;color:var(--muted);font-size:10px;font-family:var(--mono);padding:16px;margin-top:8px;border-top:1px solid var(--border)}
+@media(max-width:1600px){.kgrid{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:1400px){.kgrid{grid-template-columns:repeat(4,1fr)}.cr1{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1200px){.kgrid{grid-template-columns:repeat(3,1fr)}.cr2,.cr3{grid-template-columns:1fr}.wgrid{grid-template-columns:repeat(3,1fr)}.gt-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.kgrid{grid-template-columns:repeat(2,1fr)}.cr1{grid-template-columns:1fr}.wgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.kgrid{grid-template-columns:repeat(2,1fr)}.wgrid{grid-template-columns:1fr}}
+@media print{#fbar,#landing,.hdr-r{display:none!important}#dash{display:block!important;padding:0}}
+</style>
+</head>
+<body>
+<input type="file" id="csvInp" accept=".csv" style="display:none">
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="mbox">
+    <div class="micon">✅</div>
+    <div class="mtitle" id="mtitle"></div>
+    <div class="msub" id="msub"></div>
+    <div class="mstats" id="mstats"></div>
+    <div class="macts"><button class="btn btn-primary" id="btnMCont" onclick="closeModal()"></button></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="brand">
+    <div class="brand-icon">🔒</div>
+    <div><div class="brand-title" id="hTitle"></div><div class="brand-sub" id="hSub"></div></div>
+  </div>
+  <div class="hdr-r">
+    <div class="svr-pill"><div class="dot chk" id="svrDot"></div><span id="svrLbl"></span></div>
+    <span class="fbadge" id="fbadge"></span>
+    <div class="lang-tgl"><div class="lang-opt act" id="lEN" onclick="setLang('en')">EN</div><div class="lang-opt" id="lES" onclick="setLang('es')">ES</div></div>
+    <button class="ibtn" id="thmBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="btn btn-export btn-sm" id="btnECSV" onclick="exportCSV()" style="display:none"></button>
+    <button class="btn btn-pdf btn-sm" id="btnEPDF" onclick="exportPDF()" style="display:none"></button>
+    <button class="btn btn-ghost btn-sm" id="btnNew" onclick="goLanding()" style="display:none"></button>
+    <button class="btn btn-secondary btn-sm" id="btnLCSV" onclick="document.getElementById('csvInp').click()"></button>
+  </div>
+</header>
+
+<!-- FILTER BAR -->
+<div id="fbar">
+  <span id="fbarLbl"></span>
+  <div id="fchips"></div>
+  <button class="btn btn-danger btn-sm" id="btnCA" onclick="clearAll()"></button>
+</div>
+
+<!-- LANDING -->
+<div id="landing">
+  <div class="l-inner">
+    <div class="l-title" id="lTitle"></div>
+    <p class="l-sub" id="lSub"></p>
+    <div class="mtabs">
+      <div class="mtab act" onclick="setMode('scan')" id="tabScan"></div>
+      <div class="mtab" onclick="setMode('csv')" id="tabCSV"></div>
+    </div>
+    <div class="mpanel show" id="pScan">
+      <div class="pbox">
+        <div class="plbl" id="lbl1"></div>
+        <div class="dropz" id="txtDrop">
+          <input type="file" accept=".txt" id="txtPick" onchange="onTxtFile(this.files[0])">
+          <div class="di">📄</div><div class="dt" id="dTxtT"></div><div class="ds" id="dTxtS"></div>
+          <div class="dfn" id="txtFN"></div>
+        </div>
+        <div class="plbl" id="lbl2"></div>
+        <textarea class="sta" id="sitesTA"></textarea>
+        <div class="swarn" id="sWarn">
+          ⚠️ <strong id="wT"></strong> <span id="wB"></span><br><br>
+          <code>pip install flask flask-cors requests cryptography</code><br>
+          <code>python backend.py</code><br><br>
+          <button class="btn btn-ghost btn-sm" id="btnRet" onclick="checkSvr()"></button>
+        </div>
+        <button class="btn btn-primary" id="btnScan" onclick="startScan()" style="font-size:13px;padding:10px 16px"></button>
+      </div>
+      <div class="sp pbox" id="scanProg">
+        <div class="sph"><span id="scanLbl"></span><span id="scanPct" style="color:var(--teal);font-weight:700;font-family:var(--mono)">0%</span></div>
+        <div class="pbw"><div class="pbf" id="scanBar"></div></div>
+        <div class="pcnt" id="scanCnt"></div>
+        <div class="dc" id="dcCard"><div class="dc-host" id="dcHost">—</div><div class="dc-checks" id="dcChecks"></div></div>
+        <div class="lbox" id="logBox"></div>
+      </div>
+    </div>
+    <div class="mpanel" id="pCSV">
+      <div class="dropz" id="csvDrop" style="padding:38px 20px;border-color:var(--border2)">
+        <input type="file" accept=".csv" id="csvPick" onchange="onCsvFile(this.files[0])">
+        <div class="di" style="font-size:32px">📊</div>
+        <div class="dt" style="font-size:15px" id="dCsvT"></div>
+        <div class="ds" id="dCsvS"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash">
+  <div class="dtbar">
+    <div class="dfi">📋 <strong id="dFile">—</strong> <span id="dMeta" style="color:var(--muted)"></span></div>
+    <div><input class="si" id="si1" oninput="applyF()"></div>
+  </div>
+
+  <!-- KPIs — 9 cards -->
+  <div class="kgrid" id="kgrid">
+    <div class="kcard" data-k="all"      onclick="toggleK('all')"      style="--acc:#3b9eff"><div class="kbar" style="background:#3b9eff"></div><div class="klbl" id="kTL"></div><div class="kval" id="kTot" style="color:#3b9eff">0</div><div class="ksub" id="kTS"></div></div>
+    <div class="kcard" data-k="https"    onclick="toggleK('https')"    style="--acc:#2dde98"><div class="kbar" style="background:#2dde98"></div><div class="klbl" id="kHL"></div><div class="kval" id="kHtt" style="color:#2dde98">0</div><div class="ksub" id="kHS"></div></div>
+    <div class="kcard" data-k="errors"   onclick="toggleK('errors')"   style="--acc:#ff4d6a"><div class="kbar" style="background:#ff4d6a"></div><div class="klbl" id="kEL"></div><div class="kval" id="kErr" style="color:#ff4d6a">0</div><div class="ksub" id="kES"></div></div>
+    <div class="kcard" data-k="vigentes" onclick="toggleK('vigentes')" style="--acc:#00e5c3"><div class="kbar" style="background:#00e5c3"></div><div class="klbl" id="kVL"></div><div class="kval" id="kVig" style="color:#00e5c3">0</div><div class="ksub" id="kVS"></div></div>
+    <div class="kcard" data-k="expiring" onclick="toggleK('expiring')" style="--acc:#ff8c42"><div class="kbar" style="background:#ff8c42"></div><div class="klbl" id="kXL"></div><div class="kval" id="kExp" style="color:#ff8c42">0</div><div class="ksub" id="kXS"></div></div>
+    <div class="kcard" data-k="vencidos" onclick="toggleK('vencidos')" style="--acc:#ff4d6a"><div class="kbar" style="background:#ff4d6a"></div><div class="klbl" id="kNL"></div><div class="kval" id="kVen" style="color:#ff4d6a">0</div><div class="ksub" id="kNS"></div></div>
+    <div class="kcard" data-k="wktls"    onclick="toggleK('wktls')"    style="--acc:#ff4d6a"><div class="kbar" style="background:#ff4d6a"></div><div class="klbl" id="kTlsL"></div><div class="kval" id="kTls" style="color:#ff4d6a">0</div><div class="ksub" id="kTlsS"></div></div>
+    <div class="kcard" data-k="wkkey"    onclick="toggleK('wkkey')"    style="--acc:#fbbf24"><div class="kbar" style="background:#fbbf24"></div><div class="klbl" id="kWkKL"></div><div class="kval" id="kWkK" style="color:#fbbf24">0</div><div class="ksub" id="kWkKS"></div></div>
+    <div class="kcard" data-k="wkcph"    onclick="toggleK('wkcph')"    style="--acc:#ec4899"><div class="kbar" style="background:#ec4899"></div><div class="klbl" id="kWkCL"></div><div class="kval" id="kWkC" style="color:#ec4899">0</div><div class="ksub" id="kWkCS"></div></div>
+  </div>
+
+  <!-- ══ COMPLIANCE BLOCK (standalone, larger) ══ -->
+  <div class="cblock">
+    <div class="cmain">
+      <div class="cbadge ga" id="cbadge">A</div>
+      <div class="cbody"><div class="ctitle" id="ctitle"></div><div class="ctext" id="ctext"></div><div class="cpills" id="cpills"></div></div>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS PANEL: Grade Thresholds + Weights + Expiry ══ -->
+  <div class="cblock" style="margin-bottom:14px">
+    <div class="cdetail" style="margin-top:0;padding-top:0;border-top:none">
+
+      <!-- Grade Threshold Sliders -->
+      <div class="cdetail-section">
+        <div class="frow">
+          <span class="flbl" id="gtLbl"></span>
+          <div class="wreset" style="margin:0"><button class="btn btn-ghost btn-sm" id="btnRstGT" onclick="resetGradeThresholds()"></button></div>
+        </div>
+        <div class="gt-grid">
+          <div class="gt-row"><span class="gt-badge ga-sm">A</span><div class="gt-info"><div class="gt-row-header"><span class="wslbl" id="gtALbl"></span><span class="wsv gt-val" id="gtAV" style="color:var(--green)">95</span></div><input type="range" id="gtA" min="51" max="99" value="95" step="1" oninput="onGT()" style="accent-color:var(--green)"><span class="gt-hint" id="gtAHint"></span></div></div>
+          <div class="gt-row"><span class="gt-badge gb-sm">B</span><div class="gt-info"><div class="gt-row-header"><span class="wslbl" id="gtBLbl"></span><span class="wsv gt-val" id="gtBV" style="color:var(--teal)">85</span></div><input type="range" id="gtB" min="26" max="98" value="85" step="1" oninput="onGT()" style="accent-color:var(--teal)"><span class="gt-hint" id="gtBHint"></span></div></div>
+          <div class="gt-row"><span class="gt-badge gc-sm">C</span><div class="gt-info"><div class="gt-row-header"><span class="wslbl" id="gtCLbl"></span><span class="wsv gt-val" id="gtCV" style="color:var(--orange)">75</span></div><input type="range" id="gtC" min="1" max="97" value="75" step="1" oninput="onGT()" style="accent-color:var(--orange)"><span class="gt-hint" id="gtCHint"></span></div></div>
+          <div class="gt-row gt-row-d"><span class="gt-badge gd-sm">D</span><div class="gt-info"><div class="gt-row-header"><span class="wslbl" id="gtDLbl"></span><span class="wsv gt-val" id="gtDV" style="color:var(--red)">≤ 75</span></div></div></div>
+        </div>
+        <div class="gt-err" id="gtErr" style="display:none"></div>
+      </div>
+
+      <div class="cdetail-divider"></div>
+
+      <!-- Weight Sliders -->
+      <div class="frow"><span class="flbl" id="fLbl"></span><span class="feq" id="feq"></span></div>
+      <div class="wgrid">
+        <div class="ws"><div class="wsh"><span class="wslbl" id="wHL"></span><span class="wsv" id="wHV" style="color:var(--blue)">25%</span></div><input type="range" id="wH" min="0" max="100" value="25" step="1" oninput="onW()"><span class="ws-metric" id="wHMetric"></span></div>
+        <div class="ws"><div class="wsh"><span class="wslbl" id="wCL"></span><span class="wsv" id="wCV" style="color:var(--green)">10%</span></div><input type="range" id="wC" min="0" max="100" value="10" step="1" oninput="onW()"><span class="ws-metric" id="wCMetric"></span></div>
+        <div class="ws"><div class="wsh"><span class="wslbl" id="wEL"></span><span class="wsv" id="wEV" style="color:var(--orange)">5%</span></div><input type="range" id="wE" min="0" max="100" value="5" step="1" oninput="onW()"><span class="ws-metric" id="wEMetric"></span></div>
+        <div class="ws"><div class="wsh"><span class="wslbl" id="wTL"></span><span class="wsv" id="wTV" style="color:var(--violet)">20%</span></div><input type="range" id="wTLS" min="0" max="100" value="20" step="1" oninput="onW()" style="accent-color:var(--violet)"><span class="ws-metric" id="wTMetric"></span></div>
+        <div class="ws"><div class="wsh"><span class="wslbl" id="wKL"></span><span class="wsv" id="wKV" style="color:var(--yellow)">20%</span></div><input type="range" id="wKEY" min="0" max="100" value="20" step="1" oninput="onW()" style="accent-color:var(--yellow)"><span class="ws-metric" id="wKMetric"></span></div>
+        <div class="ws"><div class="wsh"><span class="wslbl" id="wPL"></span><span class="wsv" id="wPV" style="color:#ec4899">20%</span></div><input type="range" id="wCPH" min="0" max="100" value="20" step="1" oninput="onW()" style="accent-color:#ec4899"><span class="ws-metric" id="wPMetric"></span></div>
+      </div>
+      <div class="wsum" id="wsum"></div>
+      <div class="wreset"><button class="btn btn-ghost btn-sm" id="btnRstW" onclick="resetWeights()"></button></div>
+
+      <div class="cdetail-divider"></div>
+
+      <!-- Expiry Threshold Slider (moved here) -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label id="esLbl" style="font-size:10px;font-weight:700;color:var(--muted2);font-family:var(--mono);white-space:nowrap;flex-shrink:0"></label>
+        <div class="sl-wrap"><input type="range" id="eslider" min="7" max="180" value="30" step="1" oninput="onExpiry(this.value)"><div class="slval"><span id="esVal">30</span>d</div></div>
+        <button class="btn btn-ghost btn-sm" id="btnRstE" onclick="resetExpiry()"></button>
+        <span class="slhint" id="esHint"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 1: HTTPS Status | Error Types | TLS Versions -->
+  <div class="cr1" style="margin-bottom:10px">
+    <div class="cc" id="cHttp"><div class="cct"><span id="cHLbl"></span><span class="chtag" id="ctag1"></span><span class="chint" id="chint1"></span></div><div class="cw h200"><canvas id="chHttp"></canvas></div></div>
+    <div class="cc" id="cErr"><div class="cct"><span id="cELbl"></span><span class="chtag" id="ctag5"></span><span class="chint" id="chint5"></span></div><div class="cw h200" id="errWrap"><canvas id="chErr"></canvas></div><div id="noErr" style="display:none;text-align:center;padding:60px 0;color:var(--green);font-size:12px;font-weight:700;font-family:var(--mono)"></div></div>
+    <div class="cc" id="cTLS"><div class="cct"><span id="cTLbl"></span><span class="chtag" id="ctag3"></span><span class="chint" id="chint3"></span></div><div class="cw h200"><canvas id="chTLS"></canvas></div><div class="vuln-legend" id="vulnTlsLegend"></div></div>
+  </div>
+  <!-- Row 2: Key Algorithm+Size | Cipher Suites | Top SSL Issuers -->
+  <div class="cr1" style="margin-bottom:10px">
+    <div class="cc" id="cKeySize"><div class="cct"><span id="cKSLbl"></span><span class="chtag" id="ctag7"></span><span class="chint" id="chint7"></span></div><div class="cw h220"><canvas id="chKeySize"></canvas></div><div class="vuln-legend" id="vulnKeyLegend"></div></div>
+    <div class="cc" id="cCipher"><div class="cct"><span id="cCphLbl"></span><span class="chtag" id="ctag8"></span><span class="chint" id="chint8"></span></div><div class="cw h220"><canvas id="chCipher"></canvas></div><div class="vuln-legend" id="vulnCphLegend"></div></div>
+    <div class="cc" id="cIss"><div class="cct"><span id="cILbl"></span><span class="chtag" id="ctag6"></span><span class="chint" id="chint6"></span></div><div class="cw h220"><canvas id="chIss"></canvas></div></div>
+  </div>
+  <!-- Row 3: Days Remaining (full width) -->
+  <div style="margin-bottom:10px">
+    <div class="cc" id="cDays"><div class="cct"><span id="cDLbl"></span><span class="chtag" id="ctag4"></span><span class="chint" id="chint4"></span></div><div class="cw h200"><canvas id="chDays"></canvas></div></div>
+  </div>
+  <!-- Row 4: Domain Table (full width) -->
+  <div style="margin-bottom:14px">
+    <div class="cc">
+      <div class="thead2">
+        <div><div class="ttitle" id="tblTitle"></div></div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <div class="pg-btns" id="pgBtns">
+            <button class="pg-btn act" onclick="setPageSize(10)">10</button>
+            <button class="pg-btn" onclick="setPageSize(25)">25</button>
+            <button class="pg-btn" onclick="setPageSize(50)">50</button>
+            <button class="pg-btn" id="pgAll" onclick="setPageSize(0)"></button>
+          </div>
+          <input class="si" id="si2" oninput="applyF()">
+        </div>
+      </div>
+      <div class="tsc" id="tsc" style="max-height:380px;overflow-y:auto">
+        <table>
+          <thead><tr>
+            <th class="so" data-s="hostname" id="th0"></th>
+            <th class="tc2" id="th1"></th>
+            <th class="tc2" id="th2"></th>
+            <th id="th3"></th>
+            <th class="so" data-s="days" id="th4"></th>
+            <th class="tc2" id="th5">TLS</th>
+            <th class="tc2" id="th7"></th>
+            <th class="tc2" id="th8"></th>
+            <th class="tc2" id="th6"></th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="tctr">
+        <div class="pg-nav" id="pgNav" style="display:flex;align-items:center;gap:4px"></div>
+        <span id="showLbl"></span>
+        <span class="tpct" id="tpct"></span>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="footer" id="ftEl"></footer>
+
+<script>
+const CANDIDATE_PORTS=[5151,5152,5153,8181,8282,8383,9191,9292];
+let SERVER='http://localhost:5151'; // updated dynamically by checkSvr
+const PAL=['#00e5c3','#3b9eff','#fbbf24','#ff4d6a','#a78bfa','#ec4899','#2dde98','#ff8c42'];
+const el=id=>document.getElementById(id);
+
+/* ══ FULL I18N ══════════════════════════════ */
+const T={
+en:{
+  page_title:'HTTPS / SSL Dashboard',brand_title:'HTTPS / SSL Dashboard',brand_sub:'certificate audit · domain security',
+  btn_ecsv:'⬇ Export CSV',btn_epdf:'📄 Export PDF',btn_new:'← New Scan',btn_lcsv:'📂 Load CSV',
+  fbar_lbl:'Active filters:',btn_ca:'✕ Clear all',
+  land_title:'Audit your sites<br><span>HTTPS &amp; SSL</span>',
+  land_sub:'Scan domains from a .txt file or load an existing .csv report.<br>Scanning requires <code style="font-family:var(--mono);font-size:11px">backend.py</code> to be running.',
+  tab_scan:'⚡ Scan sites (TXT)',tab_csv:'📂 Load CSV',
+  lbl1:'1. Sites file (.txt)',lbl2:'— or type / paste sites —',
+  drop_txt_t:'Drag your .txt file here',drop_txt_s:'One domain per line — or type below',
+  drop_csv_t:'Drag your CSV file here',drop_csv_s:'generated by backend.py',
+  warn_t:'Backend not detected.',warn_b:' Start it with:',btn_ret:'🔄 Retry connection',
+  btn_scan:'⚡ Start Scan',sites_ph:'google.com\nhttps://github.com\nexample.com:8443',
+  scanning:'Scanning...',scan_done:'Scan complete!',scan_err:'Scan error',scan_fb:'Falling back to legacy endpoint...',
+  modal_t:'Scan Complete!',modal_s:'Results are ready. Click below to view the dashboard.',modal_cont:'View Results →',
+  modal_total:'Total',modal_ok:'OK',modal_fail:'Failed',
+  svr_ok:'backend active',svr_off:'backend offline',svr_chk:'checking...',
+  domains:'domains',search_ph:'🔍 search domain...',search_ph2:'🔍 search...',
+  es_lbl:'⚠️ Expiry Threshold:',es_rst:'↺ Reset',es_hint:'Certificates expiring in less than {n} days are flagged as "Expiring"',
+  k_total:'Total',k_total_s:'domains analyzed',k_https:'HTTPS Active',k_err:'With Error',
+  k_vig:'Valid Certs',k_exp:'Expiring',k_ven:'Expired',k_pct:' of total',k_exp_soon:'expiring soon',
+  k_tls:'TLS Weak',k_tls_s:'of active',k_wkkey:'Weak Keys',k_wkcph:'Weak Ciphers',
+  th7:'Key+Size',th8:'Cipher Suite',pg_all:'All',
+  c_title:'Compliance & Risk Summary',c_load:'Load data to see analysis.',
+  f_lbl:'Formula:',
+  w_https:'HTTPS Connectivity',w_conn:'Valid Certificates',w_exp:'Expiring Certificates',
+  w_tls:'Weak TLS < 1.2',w_key:'Weak Key (Algo+Size)',w_cph:'Weak Cipher Suite',
+  w_rst:'↺ Reset weights to default',
+  w_ok:'Sum: {n}% ✓',w_bad:'Sum: {n}% ⚠ (must equal 100%)',
+  feq_t:'Score = (h/total×{h}%) + (vig/active×{c}%) + ((1−exp/active)×{e}%) + ((1−wkTLS/active)×{tl}%) + ((1−wkKey/active)×{wk}%) + ((1−wkCph/active)×{wc}%)',
+  k_tls_note:'(SSL3/TLS1.0/1.1)',
+  vuln_key_title:'Vulnerable Keys (Algorithm + Size)',
+  vuln_cph_title:'Vulnerable Cipher Suites',
+  vuln_key_hint:'RSA<2048 · EC<256 · DSA any · MD5/SHA1 signed',
+  vuln_cph_hint:'RC4 · DES · 3DES · NULL · EXPORT · ANON ciphers',
+  ch_keysize:'🔑 Key Algorithm + Size',ch_cipher:'🔐 Cipher Suites',
+  cp_wkkey:'weak keys',cp_wkcph:'weak ciphers',
+  cn_wkkey:'⚠ {n} domain(s) use weak key algorithms/sizes. ',
+  cn_wkcph:'⚠ {n} domain(s) use vulnerable cipher suites. ',
+  grade_a:'✅ Excellent Posture',grade_b:'🔵 Good Posture',grade_c:'⚠️ At Risk',grade_d:'🔴 Critical Posture',
+  gt_lbl:'Grade Thresholds',gt_rst:'↺ Reset thresholds',
+  gt_a:'Grade A above',gt_b:'Grade B above',gt_c:'Grade C above',gt_d:'Grade D (≤ C threshold)',
+  gt_hint_a:'Score ≥ {n} → A',gt_hint_b:'Score ≥ {n} → B',gt_hint_c:'Score ≥ {n} → C',gt_hint_d:'Score < {n} → D',
+  gt_err_order:'Thresholds must be in descending order: A > B > C',
+  no_exp:'No expired certificates.',
+  cn_h:'{h}/{tot} domains ({p}%) have active HTTPS. ',
+  cn_ey:'{n} domain(s) failed connectivity or SSL checks. ',
+  cn_en:'No connectivity errors. ',
+  cn_vy:'{n} certificate(s) are expired — immediate renewal required. ',
+  cn_xy:'{n} certificate(s) expire within {d} days. ',
+  cn_w:'⚠ {n} domain(s) use vulnerable TLS < 1.2 — upgrade required. ',
+  cp_tls:'Weak TLS < 1.2',cp_tls_vuln:'vulnerable TLS',
+  ch_http:'🌐 HTTPS Status',ch_algo:'🔐 Key Algorithms',ch_tls:'📡 TLS Versions',
+  vuln_tls_hdr:'Vulnerable TLS (NIST SP 800-52r2 / PCI DSS 4.0)',
+  vuln_tls_list:'SSL 2.0 · SSL 3.0 · TLS 1.0 · TLS 1.1',
+  ch_days:'📅 Days Remaining by Domain',ch_err:'⚠️ Error Types',ch_iss:'🏢 Top SSL Issuers',
+  ch_keysize:'🔑 Key Algorithm + Size',ch_cipher:'🔐 Cipher Suites',
+  vuln_key_hdr:'Vulnerable Keys (NIST SP 800-57 / PCI DSS 4.0)',
+  vuln_key_list:'RSA < 2048b · EC/ECDSA < 256b · DSA (any) · MD5/SHA-1 signed',
+  vuln_cph_hdr:'Vulnerable Ciphers (NIST SP 800-52r2 / PCI DSS 4.0)',
+  vuln_cph_list:'RC4_* · DES_* · 3DES_* · NULL · EXPORT · ADH/AECDH · *_MD5',
+  ch_tag:'active filter',ch_hint:'click → filter',ch_noerr:'✅ No errors detected',
+  tbl_t:'📋 Domain Table',th0:'Domain',th1:'HTTPS',th2:'Issuer',th3:'Expires',th4:'Days',th6:'Status',
+  tbl_show:'Showing {f} of {t}',tbl_none:'No results',
+  pill_y:'✓ Yes',pill_n:'✗ No',
+  st_valid:'Valid',st_exp:'Expiring',st_expired:'EXPIRED',st_nohttps:'No HTTPS',st_nocert:'No Cert',
+  cp_err:'errors',cp_ven:'expired',cp_exp:'expiring',cp_vig:'valid',
+  https_y:'HTTPS Active',https_n:'No HTTPS/Error',
+  footer:'https/ssl dashboard · backend.py · v5',exp_prompt:'Save as (suggested path):',
+},
+es:{
+  page_title:'Dashboard HTTPS / SSL',brand_title:'Dashboard HTTPS / SSL',brand_sub:'auditoría de certificados · seguridad de dominios',
+  btn_ecsv:'⬇ Exportar CSV',btn_epdf:'📄 Exportar PDF',btn_new:'← Nueva Búsqueda',btn_lcsv:'📂 Cargar CSV',
+  fbar_lbl:'Filtros activos:',btn_ca:'✕ Borrar todo',
+  land_title:'Audita tus sitios<br><span>HTTPS &amp; SSL</span>',
+  land_sub:'Escanea dominios desde un archivo .txt o carga un reporte .csv.<br>El escaneo requiere que <code style="font-family:var(--mono);font-size:11px">backend.py</code> esté en ejecución.',
+  tab_scan:'⚡ Escanear sitios (TXT)',tab_csv:'📂 Cargar CSV existente',
+  lbl1:'1. Archivo de sitios (.txt)',lbl2:'— o escribe / pega los sitios —',
+  drop_txt_t:'Arrastra tu archivo .txt aquí',drop_txt_s:'Un dominio por línea — o escríbelos abajo',
+  drop_csv_t:'Arrastra tu archivo CSV aquí',drop_csv_s:'generado por backend.py',
+  warn_t:'Backend no detectado.',warn_b:' Inícialo con:',btn_ret:'🔄 Reintentar conexión',
+  btn_scan:'⚡ Iniciar escaneo',sites_ph:'google.com\nhttps://github.com\nexample.com:8443',
+  scanning:'Escaneando...',scan_done:'¡Escaneo completo!',scan_err:'Error en escaneo',scan_fb:'Usando endpoint alternativo...',
+  modal_t:'¡Escaneo completo!',modal_s:'Resultados listos. Haz clic para ver el dashboard.',modal_cont:'Ver resultados →',
+  modal_total:'Total',modal_ok:'OK',modal_fail:'Error',
+  svr_ok:'servidor activo',svr_off:'servidor offline',svr_chk:'comprobando...',
+  domains:'dominios',search_ph:'🔍 buscar dominio...',search_ph2:'🔍 buscar...',
+  es_lbl:'⚠️ Umbral "Por Vencer":',es_rst:'↺ Restablecer',es_hint:'Certificados que vencen en menos de {n} días se marcan como "Por Vencer"',
+  k_total:'Total',k_total_s:'dominios analizados',k_https:'HTTPS Activo',k_err:'Con Error',
+  k_vig:'Certs Vigentes',k_exp:'Por Vencer',k_ven:'Vencidos',k_pct:' del total',k_exp_soon:'por vencer',
+  k_tls:'TLS Débil',k_tls_s:'del activo',k_wkkey:'Claves Débiles',k_wkcph:'Cifrados Débiles',
+  th7:'Clave+Tamaño',th8:'Cipher Suite',pg_all:'Todos',
+  c_title:'Resumen de Cumplimiento y Riesgo',c_load:'Carga datos para ver el análisis.',
+  f_lbl:'Fórmula:',
+  w_https:'Conectividad HTTPS',w_conn:'Certificados Vigentes',w_exp:'Certificados por Vencer',
+  w_tls:'TLS Vulnerable < 1.2',w_key:'Clave Débil (Algo+Tamaño)',w_cph:'Cifrado Vulnerable',
+  w_rst:'↺ Restablecer pesos al predeterminado',
+  w_ok:'Suma: {n}% ✓',w_bad:'Suma: {n}% ⚠ (debe ser 100%)',
+  feq_t:'Score = (h/total×{h}%) + (vig/activos×{c}%) + ((1−exp/activos)×{e}%) + ((1−wkTLS/activos)×{tl}%) + ((1−wkKey/activos)×{wk}%) + ((1−wkCph/activos)×{wc}%)',
+  k_tls_note:'(SSL3/TLS1.0/1.1)',
+  ch_keysize:'🔑 Algoritmo + Tamaño de Clave',ch_cipher:'🔐 Suites de Cifrado',
+  cp_wkkey:'claves débiles',cp_wkcph:'cifrados débiles',
+  cn_wkkey:'⚠ {n} dominio(s) usan algoritmos/tamaños de clave débiles. ',
+  cn_wkcph:'⚠ {n} dominio(s) usan suites de cifrado vulnerables. ',
+  grade_a:'✅ Postura Excelente',grade_b:'🔵 Postura Buena',grade_c:'⚠️ Postura de Riesgo',grade_d:'🔴 Postura Crítica',
+  gt_lbl:'Umbrales de Calificación',gt_rst:'↺ Restablecer umbrales',
+  gt_a:'Calificación A mayor que',gt_b:'Calificación B mayor que',gt_c:'Calificación C mayor que',gt_d:'Calificación D (≤ umbral C)',
+  gt_hint_a:'Score ≥ {n} → A',gt_hint_b:'Score ≥ {n} → B',gt_hint_c:'Score ≥ {n} → C',gt_hint_d:'Score < {n} → D',
+  gt_err_order:'Los umbrales deben estar en orden descendente: A > B > C',
+  no_exp:'Sin certificados vencidos.',
+  cn_h:'{h}/{tot} dominios ({p}%) tienen HTTPS activo. ',
+  cn_ey:'{n} dominio(s) fallaron en conectividad o SSL. ',
+  cn_en:'Sin errores de conectividad. ',
+  cn_vy:'{n} certificado(s) expirado(s) — renovación inmediata requerida. ',
+  cn_xy:'{n} certificado(s) vencen en menos de {d} días. ',
+  cn_w:'⚠ {n} dominio(s) usan TLS vulnerable < 1.2 — actualización requerida. ',
+  cp_tls:'TLS Vulnerable < 1.2',cp_tls_vuln:'TLS vulnerable',
+  ch_http:'🌐 Estado HTTPS',ch_algo:'🔐 Algoritmos de Clave',ch_tls:'📡 Versiones TLS',
+  vuln_tls_hdr:'TLS Vulnerables (NIST SP 800-52r2 / PCI DSS 4.0)',
+  vuln_tls_list:'SSL 2.0 · SSL 3.0 · TLS 1.0 · TLS 1.1',
+  vuln_key_hdr:'Claves Vulnerables (NIST SP 800-57 / PCI DSS 4.0)',
+  vuln_key_list:'RSA < 2048b · EC/ECDSA < 256b · DSA (cualquiera) · firmados MD5/SHA-1',
+  vuln_cph_hdr:'Cifrados Vulnerables (NIST SP 800-52r2 / PCI DSS 4.0)',
+  vuln_cph_list:'RC4_* · DES_* · 3DES_* · NULL · EXPORT · ADH/AECDH · *_MD5',
+  ch_days:'📅 Días Restantes por Dominio',ch_err:'⚠️ Tipos de Error',ch_iss:'🏢 Top Emisores SSL',
+  ch_tag:'filtro activo',ch_hint:'clic → filtrar',ch_noerr:'✅ Sin errores detectados',
+  tbl_t:'📋 Tabla de Dominios',th0:'Dominio',th1:'HTTPS',th2:'Emisor',th3:'Vence',th4:'Días',th6:'Estado',
+  tbl_show:'Mostrando {f} de {t}',tbl_none:'Sin resultados',
+  pill_y:'✓ Sí',pill_n:'✗ No',
+  st_valid:'Válido',st_exp:'Por Vencer',st_expired:'EXPIRADO',st_nohttps:'Sin HTTPS',st_nocert:'Sin Cert',
+  cp_err:'errores',cp_ven:'expirados',cp_exp:'por vencer',cp_vig:'vigentes',
+  https_y:'HTTPS Activo',https_n:'Sin HTTPS/Error',
+  footer:'dashboard https/ssl · backend.py · v5',exp_prompt:'Guardar como (ruta sugerida):',
+}};
+
+let LANG='en';
+function t(k,v){let s=(T[LANG][k]||T.en[k]||k);if(v)Object.entries(v).forEach(([p,r])=>{s=s.replaceAll('{'+p+'}',r);});return s;}
+
+/* apply every translated string to the DOM */
+function applyLang(){
+  document.title=t('page_title');document.documentElement.lang=LANG;
+  el('lEN').classList.toggle('act',LANG==='en');el('lES').classList.toggle('act',LANG==='es');
+  // header
+  el('hTitle').textContent=t('brand_title');el('hSub').textContent=t('brand_sub');
+  el('btnECSV').textContent=t('btn_ecsv');el('btnEPDF').textContent=t('btn_epdf');
+  el('btnNew').textContent=t('btn_new');el('btnLCSV').textContent=t('btn_lcsv');
+  // filter bar
+  el('fbarLbl').textContent=t('fbar_lbl');el('btnCA').textContent=t('btn_ca');
+  // landing
+  el('lTitle').innerHTML=t('land_title');el('lSub').innerHTML=t('land_sub');
+  el('tabScan').textContent=t('tab_scan');el('tabCSV').textContent=t('tab_csv');
+  el('lbl1').textContent=t('lbl1');el('lbl2').textContent=t('lbl2');
+  el('dTxtT').textContent=t('drop_txt_t');el('dTxtS').textContent=t('drop_txt_s');
+  el('dCsvT').textContent=t('drop_csv_t');el('dCsvS').textContent=t('drop_csv_s');
+  el('wT').textContent=t('warn_t');el('wB').textContent=t('warn_b');
+  el('btnRet').textContent=t('btn_ret');el('btnScan').textContent=t('btn_scan');
+  el('sitesTA').placeholder=t('sites_ph');
+  el('scanLbl').textContent=t('scanning');
+  // KPI labels
+  el('kTL').textContent=t('k_total');el('kHL').textContent=t('k_https');
+  el('kEL').textContent=t('k_err');el('kVL').textContent=t('k_vig');
+  el('kXL').textContent=t('k_exp')+' <'+exDays+'d';el('kNL').textContent=t('k_ven');
+  el('kTlsL').textContent=t('k_tls');
+  el('kWkKL').textContent=t('k_wkkey');el('kWkCL').textContent=t('k_wkcph');
+  // compliance labels
+  el('ctitle').textContent=t('c_title');
+  el('ctext').textContent=allData.length?el('ctext').textContent:t('c_load');
+  el('gtLbl').textContent=t('gt_lbl');el('btnRstGT').textContent=t('gt_rst');
+  el('gtALbl').textContent=t('gt_a');el('gtBLbl').textContent=t('gt_b');
+  el('gtCLbl').textContent=t('gt_c');el('gtDLbl').textContent=t('gt_d');
+  el('fLbl').textContent=t('f_lbl');
+  el('wHL').textContent=t('w_https');el('wCL').textContent=t('w_conn');el('wEL').textContent=t('w_exp');
+  el('wTL').textContent=t('w_tls');el('wKL').textContent=t('w_key');el('wPL').textContent=t('w_cph');
+  el('btnRstW').textContent=t('w_rst');
+  updateGTUI();updateWeightUI();
+  // chart titles + hints
+  el('cHLbl').textContent=t('ch_http');el('cTLbl').textContent=t('ch_tls');
+  el('cDLbl').textContent=t('ch_days');el('cELbl').textContent=t('ch_err');el('cILbl').textContent=t('ch_iss');
+  el('cKSLbl').textContent=t('ch_keysize');el('cCphLbl').textContent=t('ch_cipher');
+  for(let i=1;i<=8;i++){
+    const tag=el('ctag'+i),hint=el('chint'+i);
+    if(tag)tag.textContent=t('ch_tag');
+    if(hint)hint.textContent=t('ch_hint');
+  }
+  el('noErr').textContent=t('ch_noerr');
+  // vuln legends (re-populate on language switch)
+  const vtl=el('vulnTlsLegend');if(vtl&&vtl.innerHTML)vtl.innerHTML=`<strong>${t('vuln_tls_hdr')}</strong>${t('vuln_tls_list')}`;
+  const vkl=el('vulnKeyLegend');if(vkl&&vkl.innerHTML)vkl.innerHTML=`<strong>${t('vuln_key_hdr')}</strong>${t('vuln_key_list')}`;
+  const vcl=el('vulnCphLegend');if(vcl&&vcl.innerHTML)vcl.innerHTML=`<strong>${t('vuln_cph_hdr')}</strong>${t('vuln_cph_list')}`;
+  // table headers
+  el('tblTitle').textContent=t('tbl_t');
+  el('th0').textContent=t('th0');el('th1').textContent=t('th1');el('th2').textContent=t('th2');
+  el('th3').textContent=t('th3');el('th4').textContent=t('th4');el('th6').textContent=t('th6');
+  el('th7').textContent=t('th7');el('th8').textContent=t('th8');
+  el('si1').placeholder=t('search_ph');el('si2').placeholder=t('search_ph2');
+  if(el('pgAll'))el('pgAll').textContent=t('pg_all');
+  // expiry slider
+  el('esLbl').textContent=t('es_lbl');el('btnRstE').textContent=t('es_rst');
+  updateExpiryHint();
+  // server dot
+  const dot=el('svrDot');
+  el('svrLbl').textContent=dot.classList.contains('on')?t('svr_ok'):dot.classList.contains('off')?t('svr_off'):t('svr_chk');
+  // footer
+  el('ftEl').textContent=t('footer');
+  // re-render all data with new language
+  if(allData.length){
+    el('dMeta').textContent='· '+allData.length+' '+t('domains');
+    refresh();
+  }
+}
+
+function setLang(l){LANG=l;applyLang();}
+
+/* ══ THEME ═══════════════════════════════════ */
+let dark=true;
+function toggleTheme(){
+  dark=!dark;
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  el('thmBtn').textContent=dark?'🌙':'☀️';
+  if(allData.length&&el('dash').style.display!=='none')rebuildCharts();
+}
+const gc=()=>dark?'#1e2535':'#d8e4f0',tc=()=>dark?'#4a566a':'#8fa0ba',tc2=()=>dark?'#6b7a8d':'#6b7f98';
+const bo=()=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc2(),font:{size:10,family:"'JetBrains Mono'"}}}}});
+
+/* ══ STATE & HELPERS ═════════════════════════ */
+let allData=[],exDays=30,wH=25,wC=10,wE=5,wT=20,wK=20,wP=20;
+let pageSize=10,currentPage=0; // pagination
+// Grade thresholds
+let gtA=95,gtB=85,gtC=75;
+const filters=new Map(),flabels=new Map(),charts={},issuerFull=[],rowData={};
+let sortCol=null,sortDir=1,pendingCsv=null,pendingFn=null,curCsv=null;
+
+// ── Vulnerability definitions ────────────────────────────────────────────────
+// Weak key: RSA/DSA<2048, EC<256, any DSA, or unknown algo
+const VULN_KEY_DESC=['RSA < 2048 bits','DSA (any size)','EC < 256 bits','Unknown algorithm'];
+function isWeakKey(r){
+  const algo=(r.ssl_key_algorithm||'').toUpperCase();
+  const bits=parseInt(r.ssl_key_size_bits||'0',10);
+  if(!algo)return false;
+  if(algo==='RSA'||algo==='DSA') return algo==='DSA'||bits<2048;
+  if(algo==='EC'||algo==='ECDSA') return bits<256;
+  if(algo.includes('ED25519')||algo.includes('ED448')) return false; // modern, safe
+  return bits>0&&bits<2048; // conservative fallback
+}
+
+// Vulnerable ciphers: RC4, DES, 3DES, NULL, EXPORT, ANON, MD5-based
+const VULN_CPH_DESC=['RC4_*','DES_*','3DES_*','*_NULL_*','EXP_*','ADH_*','AECDH_*','*_MD5'];
+const VULN_CPH_RE=/RC4|_DES_|3DES|_NULL_|EXPORT|ADH_|AECDH_|_MD5$/i;
+function isWeakCipher(r){
+  const c=(r.ssl_cipher_suite||'').trim();
+  return c!==''&&VULN_CPH_RE.test(c);
+}
+
+function daysLeft(r){if(!r.ssl_valid_until)return null;const d=new Date(r.ssl_valid_until);return isNaN(d)?null:Math.floor((d-Date.now())/86400000);}
+function isHttps(r){return(r.https_active||'').toLowerCase()==='true';}
+function hasErr(r){return(r.error_type||'').trim()!=='';}
+// TLS secure = TLS 1.2+ (NIST SP 800-52r2 / PCI DSS 4.0)
+function isTlsSecure(r){
+  const v=(r.tls_version||'').trim();
+  if(!v)return false;
+  const m=v.match(/(\d+)\.(\d+)/);
+  if(!m)return false;
+  const major=parseInt(m[1]),minor=parseInt(m[2]);
+  return major>1||(major===1&&minor>=2);
+}
+function statusOf(r){
+  if(hasErr(r))return r.error_type||'Error';
+  if(!isHttps(r))return t('st_nohttps');
+  const d=daysLeft(r);
+  if(d===null)return t('st_nocert');
+  if(d<=0)return t('st_expired');
+  if(d<=exDays)return t('st_exp');
+  return t('st_valid');
+}
+function sPCls(st){if(st===t('st_valid'))return'p-ok';if(st===t('st_exp'))return'p-warn';return'p-bad';}
+function esc(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function pct(n,tot){return tot?Math.round(n/tot*100)+'%':'0%';}
+
+/* ══ EXPIRY ═══════════════════════════════════ */
+function onExpiry(v){exDays=parseInt(v);el('esVal').textContent=v;updateExpiryHint();if(allData.length)refresh();}
+function resetExpiry(){el('eslider').value=30;onExpiry(30);}
+function updateExpiryHint(){
+  el('kXL').textContent=t('k_exp')+' <'+exDays+'d';
+  el('esHint').textContent=t('es_hint',{n:exDays});
+}
+
+/* ══ GRADE THRESHOLDS ════════════════════════ */
+function onGT(){
+  gtA=parseInt(el('gtA').value);
+  gtB=parseInt(el('gtB').value);
+  gtC=parseInt(el('gtC').value);
+  updateGTUI();
+  if(allData.length)renderCompliance(getFD());
+}
+function resetGradeThresholds(){
+  el('gtA').value=95;el('gtB').value=85;el('gtC').value=75;
+  gtA=95;gtB=85;gtC=75;
+  updateGTUI();
+  if(allData.length)renderCompliance(getFD());
+}
+function updateGTUI(){
+  // Update displayed values
+  el('gtAV').textContent=gtA;
+  el('gtBV').textContent=gtB;
+  el('gtCV').textContent=gtC;
+  el('gtDV').textContent='≤ '+gtC;
+  // Update hints
+  el('gtAHint').textContent=t('gt_hint_a',{n:gtA});
+  el('gtBHint').textContent=t('gt_hint_b',{n:gtB});
+  el('gtCHint').textContent=t('gt_hint_c',{n:gtC});
+  el('gtDLbl').textContent=t('gt_d');
+  // Validate ordering: A > B > C
+  const err=el('gtErr');
+  if(gtA<=gtB||gtB<=gtC){
+    err.textContent=t('gt_err_order');err.style.display='block';
+  }else{
+    err.style.display='none';
+  }
+  // Clamp slider ranges dynamically
+  el('gtA').min=gtB+1;
+  el('gtB').max=gtA-1;el('gtB').min=gtC+1;
+  el('gtC').max=gtB-1;
+}
+
+/* ══ WEIGHTS ══════════════════════════════════ */
+function onW(){
+  wH=parseInt(el('wH').value);wC=parseInt(el('wC').value);wE=parseInt(el('wE').value);
+  wT=parseInt(el('wTLS').value);wK=parseInt(el('wKEY').value);wP=parseInt(el('wCPH').value);
+  updateWeightUI();if(allData.length)renderCompliance(getFD());
+}
+function resetWeights(){
+  el('wH').value=25;el('wC').value=10;el('wE').value=5;
+  el('wTLS').value=20;el('wKEY').value=20;el('wCPH').value=20;
+  wH=25;wC=10;wE=5;wT=20;wK=20;wP=20;
+  updateWeightUI();if(allData.length)renderCompliance(getFD());
+}
+function updateWeightUI(){
+  el('wHV').textContent=wH+'%';el('wCV').textContent=wC+'%';el('wEV').textContent=wE+'%';
+  el('wTV').textContent=wT+'%';el('wKV').textContent=wK+'%';el('wPV').textContent=wP+'%';
+  const sum=wH+wC+wE+wT+wK+wP,ok=sum===100;
+  const ws=el('wsum');ws.textContent=t(ok?'w_ok':'w_bad',{n:sum});ws.className='wsum'+(ok?'':' bad');
+  el('feq').textContent=t('feq_t',{h:wH,c:wC,e:wE,tl:wT,wk:wK,wc:wP});
+  if(allData.length){
+    const fd=getFD(),tot=fd.length,h=fd.filter(isHttps).length;
+    const withCert=fd.filter(r=>isHttps(r)&&r.ssl_valid_until);
+    const vig=withCert.filter(r=>{const x=daysLeft(r);return x!==null&&x>exDays;}).length;
+    const exp=withCert.filter(r=>{const x=daysLeft(r);return x!==null&&x>0&&x<=exDays;}).length;
+    const tls12    =fd.filter(r=>isHttps(r)&&isTlsSecure(r)).length;
+    const tlsVuln  =fd.filter(r=>isHttps(r)&&r.tls_version&&!isTlsSecure(r)).length;
+    const wkKey=fd.filter(r=>isHttps(r)&&isWeakKey(r)).length;
+    const wkCph=fd.filter(r=>isHttps(r)&&isWeakCipher(r)).length;
+    const ofAct=LANG==='en'?'% of active':'% del activo';
+    const httpsP=tot>0?Math.round(h/tot*100):0;
+    const tlsVP =h>0?Math.round(tlsVuln/h*100):0;
+    el('wHMetric').textContent=`${httpsP}% ${LANG==='en'?'of total':'del total'} — ${h}/${tot}`;
+    el('wCMetric').textContent=`${h>0?Math.round(vig/h*100):0}% ${ofAct} — ${vig}/${h}`;
+    el('wEMetric').textContent=`${h>0?Math.round(exp/h*100):0}% ${ofAct} — ${exp}/${h}`;
+    el('wTMetric').textContent=`${tlsVP}% ${ofAct} — ${tlsVuln}/${h} ${LANG==='en'?'(vulnerable)':'(vulnerables)'}`;
+    el('wKMetric').textContent=`${h>0?Math.round(wkKey/h*100):0}% ${ofAct} — ${wkKey}/${h}`;
+    el('wPMetric').textContent=`${h>0?Math.round(wkCph/h*100):0}% ${ofAct} — ${wkCph}/${h}`;
+  }else{
+    ['wHMetric','wCMetric','wEMetric','wTMetric','wKMetric','wPMetric'].forEach(id=>el(id).textContent='');
+  }
+}
+
+/* ══ FILTERS ══════════════════════════════════ */
+function hasF(){return filters.size>0;}
+function setF(dim,val,lbl){
+  if(!filters.has(dim)){filters.set(dim,new Set());flabels.set(dim,new Map());}
+  const s=filters.get(dim),m=flabels.get(dim);
+  if(s.has(val)){s.delete(val);m.delete(val);if(s.size===0){filters.delete(dim);flabels.delete(dim);}}
+  else{s.add(val);m.set(val,lbl);}
+  currentPage=0;updFBar();refresh();
+}
+function remF(dim,val){
+  if(!filters.has(dim))return;
+  filters.get(dim).delete(val);flabels.get(dim)?.delete(val);
+  if(filters.get(dim).size===0){filters.delete(dim);flabels.delete(dim);}
+  currentPage=0;updFBar();refresh();
+}
+function clearAll(){
+  filters.clear();flabels.clear();
+  document.querySelectorAll('.kcard').forEach(c=>c.classList.remove('act'));
+  document.querySelectorAll('.cc').forEach(c=>c.classList.remove('ca'));
+  currentPage=0;updFBar();refresh();
+}
+function updFBar(){
+  const bar=el('fbar'),wrap=el('fchips');
+  if(!hasF()){bar.classList.remove('show');wrap.innerHTML='';return;}
+  bar.classList.add('show');
+  const chips=[];
+  filters.forEach((vs,dim)=>{
+    const lm=flabels.get(dim)||new Map();
+    const cls=dim.startsWith('k')?'kpi':dim.startsWith('t')?'tbl':'';
+    vs.forEach(v=>{
+      const lb=lm.get(v)||v;
+      const sd=encodeURIComponent(dim),sv=encodeURIComponent(v);
+      chips.push(`<span class="fchip ${cls}">${esc(lb)} <span class="fx" onclick="remF(decodeURIComponent('${sd}'),decodeURIComponent('${sv}'))">✕</span></span>`);
+    });
+  });
+  wrap.innerHTML=chips.join('');
+}
+function matchRow(r,dim,v){
+  switch(dim){
+    case'kpi':
+      if(v==='all')return true;
+      if(v==='https')return isHttps(r);
+      if(v==='errors')return hasErr(r);
+      if(v==='vigentes')return!hasErr(r)&&daysLeft(r)!==null&&daysLeft(r)>exDays;
+      if(v==='expiring')return!hasErr(r)&&daysLeft(r)!==null&&daysLeft(r)>0&&daysLeft(r)<=exDays;
+      if(v==='vencidos')return!hasErr(r)&&daysLeft(r)!==null&&daysLeft(r)<=0;
+      if(v==='tls12')return isHttps(r)&&isTlsSecure(r);
+      if(v==='wktls')return isHttps(r)&&r.tls_version&&!isTlsSecure(r);
+      if(v==='wkkey')return isHttps(r)&&isWeakKey(r);
+      if(v==='wkcph')return isHttps(r)&&isWeakCipher(r);
+      return false;
+    case'chartH':case'tH':return String(isHttps(r))===v;
+    case'chartA':return(r.ssl_key_algorithm||'')===v;
+    case'chartT':return(r.tls_version||'')===v;
+    case'chartE':return(r.error_type||'')===v;
+    case'chartI':case'tI':return(r.ssl_issuer||'')===v;
+    case'tS':return statusOf(r)===v;
+    case'chartKS':{
+      const algo=r.ssl_key_algorithm||'?';
+      const bits=r.ssl_key_size_bits||'?';
+      const lbl=algo+(bits&&bits!=='?'?' '+bits+'b':'');
+      return lbl===v;
+    }
+    case'chartCph':return(r.ssl_cipher_suite||'')===v;
+    default:return(r[dim]||'')===v;
+  }
+}
+function getFD(){
+  const q1=(el('si1')?el('si1').value:'').toLowerCase().trim();
+  const q2=(el('si2')?el('si2').value:'').toLowerCase().trim();
+  const q=q1||q2;
+  let f=allData;
+  if(filters.size>0){
+    f=allData.filter(r=>{
+      for(const[dim,vs]of filters){
+        let m=false;
+        for(const v of vs){if(matchRow(r,dim,v)){m=true;break;}}
+        if(!m)return false;
+      }
+      return true;
+    });
+  }
+  if(q)f=f.filter(r=>
+    (r.hostname||'').toLowerCase().includes(q)||
+    (r.ssl_issuer||'').toLowerCase().includes(q)||
+    (r.tls_version||'').toLowerCase().includes(q)||
+    (r.error_type||'').toLowerCase().includes(q)||
+    (r.ssl_key_algorithm||'').toLowerCase().includes(q)||
+    (r.ssl_cipher_suite||'').toLowerCase().includes(q)
+  );
+  return f;
+}
+function toggleK(key){
+  const cur=filters.get('kpi');
+  if(cur&&cur.has(key)){remF('kpi',key);}
+  else{
+    if(filters.has('kpi')){filters.delete('kpi');flabels.delete('kpi');}
+    const km={all:'total',https:'https',errors:'err',vigentes:'vig',expiring:'exp',vencidos:'ven',wktls:'tls',wkkey:'wkkey',wkcph:'wkcph'};
+    if(key!=='all')setF('kpi',key,t('k_'+(km[key]||key)));
+    else{currentPage=0;updFBar();refresh();}
+  }
+  document.querySelectorAll('.kcard').forEach(c=>c.classList.toggle('act',c.dataset.k===key&&filters.has('kpi')&&filters.get('kpi').has(key)));
+}
+
+/* ══ REFRESH ══════════════════════════════════ */
+function refresh(){const fd=getFD();updKPIs(fd);rebuildCharts(fd);renderTable(fd);renderCompliance(fd);}
+function applyF(){if(allData.length){currentPage=0;refresh();}}
+
+function updKPIs(d){
+  const tot=d.length;
+  const h=d.filter(isHttps).length;
+  const e=d.filter(hasErr).length;
+  const withCert=d.filter(r=>isHttps(r)&&r.ssl_valid_until);
+  const vig=withCert.filter(r=>{const x=daysLeft(r);return x!==null&&x>exDays;}).length;
+  const exp=withCert.filter(r=>{const x=daysLeft(r);return x!==null&&x>0&&x<=exDays;}).length;
+  const ven=withCert.filter(r=>{const x=daysLeft(r);return x!==null&&x<=0;}).length;
+  const tlsVuln=d.filter(r=>isHttps(r)&&r.tls_version&&!isTlsSecure(r)).length;
+  const wkKey  =d.filter(r=>isHttps(r)&&isWeakKey(r)).length;
+  const wkCph  =d.filter(r=>isHttps(r)&&isWeakCipher(r)).length;
+
+  const vigPct =h>0?Math.round(vig/h*100):0;
+  const expPct =h>0?Math.round(exp/h*100):0;
+  const venPct =h>0?Math.round(ven/h*100):0;
+  const tlsVPct=h>0?Math.round(tlsVuln/h*100):0;
+  const wkKPct =h>0?Math.round(wkKey/h*100):0;
+  const wkCPct =h>0?Math.round(wkCph/h*100):0;
+  const ofAct  =LANG==='en'?' of active':' del activo';
+
+  el('kTot').textContent=tot; el('kTS').textContent=t('k_total_s');
+  el('kHtt').textContent=h;   el('kHS').textContent=pct(h,tot)+t('k_pct');
+  el('kErr').textContent=e;   el('kES').textContent=pct(e,tot)+t('k_pct');
+  el('kVig').textContent=vig; el('kVS').textContent=`${vigPct}%${ofAct}`;
+  el('kExp').textContent=exp; el('kXS').textContent=`${expPct}%${ofAct}`;
+  el('kVen').textContent=ven; el('kNS').textContent=`${venPct}%${ofAct}`;
+  el('kTls').textContent=tlsVuln; el('kTlsS').textContent=`${tlsVPct}%${ofAct}`;
+  el('kWkK').textContent=wkKey;   el('kWkKS').textContent=`${wkKPct}%${ofAct}`;
+  el('kWkC').textContent=wkCph;   el('kWkCS').textContent=`${wkCPct}%${ofAct}`;
+}
+
+/* ══ CHARTS ═══════════════════════════════════ */
+function destAll(){
+  Object.keys(charts).forEach(k=>{
+    if(charts[k]&&typeof charts[k].destroy==='function'){charts[k].destroy();}
+    charts[k]=null;
+  });
+}
+function onCC(dim,getV,getL,cardId){
+  return function(evt,els){
+    if(!els.length)return;
+    const i=els[0].index,v=getV(i),lb=getL(i);
+    setF(dim,v,lb);
+    const card=el(cardId);if(card)card.classList.toggle('ca',filters.has(dim)&&filters.get(dim).size>0);
+  };
+}
+function rebuildCharts(fd){
+  fd=fd||getFD();destAll();
+  const DM={cHttp:'chartH',cTLS:'chartT',cDays:'tS',cErr:'chartE',cIss:'chartI',cKeySize:'chartKS',cCipher:'chartCph'};
+  document.querySelectorAll('.cc').forEach(c=>{const d=DM[c.id];if(d)c.classList.toggle('ca',filters.has(d)&&filters.get(d).size>0);});
+  const B=bo(),ne=fd.filter(r=>!hasErr(r));
+  const wh=fd.filter(isHttps).length;
+
+  // HTTPS Status doughnut
+  charts.https=new Chart(el('chHttp'),{type:'doughnut',data:{labels:[t('https_y'),t('https_n')],datasets:[{data:[wh,fd.length-wh],backgroundColor:['#00e5c3','#ff4d6a'],borderWidth:0}]},options:{...B,cutout:'65%',onClick:onCC('chartH',i=>i===0?'true':'false',i=>i===0?t('https_y'):t('https_n'),'cHttp')}});
+
+  // TLS Versions — vuln (<1.2) = red, secure = green
+  const tco={};ne.filter(isHttps).forEach(r=>{const x=r.tls_version||'?';tco[x]=(tco[x]||0)+1;});
+  const tl=Object.keys(tco);
+  const tlColors=tl.map(v=>{
+    const m=v.match(/(\d+)\.(\d+)/);
+    if(!m)return '#ff8c42';
+    return(parseInt(m[1])>1||(parseInt(m[1])===1&&parseInt(m[2])>=2))?'#00e5c3':'#ff4d6a';
+  });
+  charts.tls=new Chart(el('chTLS'),{type:'bar',data:{labels:tl,datasets:[{data:tl.map(k=>tco[k]),backgroundColor:tlColors,borderWidth:0,borderRadius:4}]},options:{...B,indexAxis:'y',plugins:{...B.plugins,legend:{display:false}},scales:{x:{ticks:{color:tc(),font:{size:9}},grid:{color:gc()}},y:{ticks:{color:tc2(),font:{size:9,family:"'JetBrains Mono'"}},grid:{display:false}}},onClick:onCC('chartT',i=>tl[i],i=>'TLS: '+tl[i],'cTLS')}});
+  // TLS vuln legend
+  const vtl=el('vulnTlsLegend');
+  if(vtl){vtl.innerHTML=`<strong>${t('vuln_tls_hdr')}</strong>${t('vuln_tls_list')}`;}
+
+  // Key Algorithm + Size — vuln = red, safe = teal
+  const ksc={};ne.filter(isHttps).forEach(r=>{
+    const algo=r.ssl_key_algorithm||'?';
+    const bits=r.ssl_key_size_bits||'?';
+    const lbl=algo+(bits&&bits!=='?'?' '+bits+'b':'');
+    ksc[lbl]=(ksc[lbl]||0)+1;
+  });
+  const ksKeys=Object.keys(ksc).sort((a,b)=>ksc[b]-ksc[a]);
+  const ksColors=ksKeys.map(k=>{
+    const parts=k.split(' ');
+    const tmp={ssl_key_algorithm:parts[0],ssl_key_size_bits:parts[1]?parts[1].replace('b',''):''};
+    return isWeakKey(tmp)?'#ff4d6a':'#00e5c3';
+  });
+  charts.keysize=new Chart(el('chKeySize'),{type:'bar',data:{labels:ksKeys,datasets:[{data:ksKeys.map(k=>ksc[k]),backgroundColor:ksColors,borderWidth:0,borderRadius:4}]},options:{...B,indexAxis:'y',plugins:{...B.plugins,legend:{display:false}},scales:{x:{ticks:{color:tc(),font:{size:9}},grid:{color:gc()}},y:{ticks:{color:tc2(),font:{size:9,family:"'JetBrains Mono'"}},grid:{display:false}}},
+    onClick:onCC('chartKS',i=>ksKeys[i],i=>`🔑 ${ksKeys[i]}${isWeakKey({ssl_key_algorithm:ksKeys[i].split(' ')[0],ssl_key_size_bits:(ksKeys[i].split(' ')[1]||'').replace('b','')})?' ⚠':''}`, 'cKeySize')}});
+  // Key vuln legend
+  const vkl=el('vulnKeyLegend');
+  if(vkl){vkl.innerHTML=`<strong>${t('vuln_key_hdr')}</strong>${t('vuln_key_list')}`;}
+
+  // Cipher Suites — vuln = red, safe = teal; store full keys for filter matching
+  const cpc={};ne.filter(isHttps).forEach(r=>{const c=(r.ssl_cipher_suite||'').trim();if(c)cpc[c]=(cpc[c]||0)+1;});
+  const cpEntries=Object.entries(cpc).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  charts._cpKeys=cpEntries.map(([k])=>k);
+  const cpShort=charts._cpKeys.map(k=>k.length>30?k.slice(0,30)+'…':k);
+  const cpColors=charts._cpKeys.map(k=>isWeakCipher({ssl_cipher_suite:k})?'#ff4d6a':'#00e5c3');
+  charts.cipher=new Chart(el('chCipher'),{type:'bar',data:{labels:cpShort,datasets:[{data:charts._cpKeys.map(k=>cpc[k]),backgroundColor:cpColors,borderWidth:0,borderRadius:4}]},options:{...B,indexAxis:'y',plugins:{...B.plugins,legend:{display:false}},scales:{x:{ticks:{color:tc(),font:{size:9}},grid:{color:gc()}},y:{ticks:{color:tc2(),font:{size:8,family:"'JetBrains Mono'"}},grid:{display:false}}},
+    onClick:onCC('chartCph',i=>charts._cpKeys[i],i=>`🔐 ${cpShort[i]}${isWeakCipher({ssl_cipher_suite:charts._cpKeys[i]})?' ⚠':''}`, 'cCipher')}});
+  // Cipher vuln legend
+  const vcl=el('vulnCphLegend');
+  if(vcl){vcl.innerHTML=`<strong>${t('vuln_cph_hdr')}</strong>${t('vuln_cph_list')}`;}
+
+
+  // Days remaining
+  const wc2=ne.filter(r=>r.ssl_valid_until&&isHttps(r));
+  const dd=wc2.map(r=>({h:r.hostname,d:daysLeft(r)})).filter(r=>r.d!==null).sort((a,b)=>a.d-b.d).slice(0,40);
+  const dc=dd.map(r=>r.d<=0?'#ff4d6a':r.d<=exDays?'#ff8c42':r.d<=90?'#fbbf24':'#00e5c3');
+  charts.days=new Chart(el('chDays'),{type:'bar',data:{labels:dd.map(r=>r.h),datasets:[{data:dd.map(r=>r.d),backgroundColor:dc,borderWidth:0,borderRadius:3}]},options:{...B,plugins:{...B.plugins,legend:{display:false}},scales:{x:{ticks:{color:tc(),font:{size:8,family:"'JetBrains Mono'"},maxRotation:45},grid:{display:false}},y:{ticks:{color:tc2(),font:{size:9}},grid:{color:gc()}}},onClick:onCC('tS',i=>statusOf(allData.find(r=>r.hostname===dd[i].h)||{}),i=>'🌐 '+dd[i].h,'cDays')}});
+
+  // Errors doughnut
+  const ec={};fd.filter(hasErr).forEach(r=>{const e=r.error_type||'?';ec[e]=(ec[e]||0)+1;});
+  const el2=Object.keys(ec),noE=el2.length===0;
+  el('errWrap').style.display=noE?'none':'';el('noErr').style.display=noE?'block':'none';
+  if(!noE){charts.err=new Chart(el('chErr'),{type:'doughnut',data:{labels:el2,datasets:[{data:el2.map(k=>ec[k]),backgroundColor:PAL.slice(0,el2.length),borderWidth:0}]},options:{...B,cutout:'55%',onClick:onCC('chartE',i=>el2[i],i=>'⚠️ '+el2[i],'cErr')}});}
+
+  // Top Issuers
+  issuerFull.length=0;
+  const ic={};ne.filter(isHttps).forEach(r=>{const x=r.ssl_issuer||'?';ic[x]=(ic[x]||0)+1;});
+  const ie=Object.entries(ic).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const ish=ie.map(([k])=>k.length>20?k.slice(0,20)+'…':k);
+  ie.forEach(([k])=>issuerFull.push(k));
+  charts.iss=new Chart(el('chIss'),{type:'bar',data:{labels:ish,datasets:[{data:ie.map(([,v])=>v),backgroundColor:PAL.slice(0,ish.length),borderWidth:0,borderRadius:4}]},options:{...B,indexAxis:'y',plugins:{...B.plugins,legend:{display:false}},scales:{x:{ticks:{color:tc(),font:{size:9}},grid:{color:gc()}},y:{ticks:{color:tc2(),font:{size:9,family:"'JetBrains Mono'"}},grid:{display:false}}},onClick:onCC('chartI',i=>issuerFull[i],i=>'🏢 '+ish[i],'cIss')}});
+}
+
+/* ══ PAGE SIZE ════════════════════════════════ */
+function setPageSize(n){
+  pageSize=n; currentPage=0;
+  document.querySelectorAll('.pg-btn').forEach(b=>{
+    const v=b.id==='pgAll'?0:parseInt(b.textContent)||0;
+    b.classList.toggle('act',v===n);
+  });
+  renderTable(getFD());
+}
+function goPage(p){currentPage=p;renderTable(getFD());}
+
+/* ══ TABLE ════════════════════════════════════ */
+function updCounter(shown,filtered,total){
+  const p=total?Math.round(filtered/total*100):0;
+  el('showLbl').textContent=t('tbl_show',{f:filtered,t:total});
+  const tp=el('tpct');tp.textContent=p+'%';
+  if(filtered===total){tp.style.background='rgba(59,158,255,.1)';tp.style.color='var(--blue)';}
+  else if(p===0){tp.style.background='rgba(255,77,106,.1)';tp.style.color='var(--red)';}
+  else{tp.style.background='rgba(0,229,195,.1)';tp.style.color='var(--teal)';}
+}
+document.querySelectorAll('thead th.so').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const col=th.dataset.s;if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}
+    document.querySelectorAll('thead th').forEach(h=>h.classList.remove('sa','sd'));
+    th.classList.add(sortDir===1?'sa':'sd');currentPage=0;renderTable(getFD());
+  });
+});
+function sortD(data){
+  if(!sortCol)return data;
+  return[...data].sort((a,b)=>{
+    let va=sortCol==='days'?daysLeft(a):a[sortCol]||'';
+    let vb=sortCol==='days'?daysLeft(b):b[sortCol]||'';
+    if(va===null)va=Infinity;if(vb===null)vb=Infinity;
+    if(typeof va==='number'&&typeof vb==='number')return(va-vb)*sortDir;
+    return String(va).localeCompare(String(vb))*sortDir;
+  });
+}
+function renderTable(data){
+  const sorted=sortD(data);
+  const tb=el('tbody');
+  const totalFiltered=sorted.length;
+  if(!totalFiltered){
+    tb.innerHTML=`<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--mono)">${t('tbl_none')}</td></tr>`;
+    updCounter(0,0,allData.length);
+    renderPagination(0,0);
+    return;
+  }
+  // Pagination
+  const ps=pageSize>0?pageSize:totalFiltered;
+  const totalPages=Math.ceil(totalFiltered/ps);
+  if(currentPage>=totalPages)currentPage=Math.max(0,totalPages-1);
+  const start=currentPage*ps;
+  const page=sorted.slice(start,start+ps);
+
+  tb.innerHTML=page.map((r,i)=>{
+    const idx=start+i; // global index in sorted array
+    const hv=isHttps(r),d=daysLeft(r),st=statusOf(r),sc=sPCls(st);
+    const iss=r.ssl_issuer||'',issS=iss.length>18?iss.slice(0,18)+'…':iss;
+    const tlv=r.tls_version||'',exp=r.ssl_valid_until?r.ssl_valid_until.slice(0,10):'—';
+    const keyAlgo=r.ssl_key_algorithm||'',keyBits=r.ssl_key_size_bits||'';
+    const keyLbl=keyAlgo+(keyBits?' '+keyBits+'b':'');
+    const keyShort=keyLbl.length>14?keyLbl.slice(0,14)+'…':keyLbl;
+    const cipher=r.ssl_cipher_suite||'';
+    const cipherShort=cipher.length>22?cipher.slice(0,22)+'…':cipher;
+    const wkK=isHttps(r)&&isWeakKey(r);
+    const wkC=isHttps(r)&&isWeakCipher(r);
+    let bc='var(--muted)',bw=0,dt='—';
+    if(d!==null){dt=d+'d';bc=d<=0?'#ff4d6a':d<=exDays?'#ff8c42':d<=90?'#fbbf24':'#00e5c3';bw=Math.max(0,Math.min(100,(d/365)*100));}
+    const hl=hv?t('pill_y'):t('pill_n'),hc=hv?'p-y':'p-n';
+    rowData[idx]={hv,iss,tlv,st,keyLbl,cipher};
+    const ic2=(dim,v)=>{const s=filters.get(dim);return s?s.has(v):false;};
+    const ha=ic2('tH',String(hv)),ia=ic2('chartI',iss),ta=ic2('chartT',tlv),sa=ic2('tS',st);
+    const ka=ic2('chartKS',keyLbl),ca=ic2('chartCph',cipher);
+    const vuln=wkK||wkC;
+    return`<tr class="${vuln?'vuln-row':''} ${(ha||ia||ta||sa||ka||ca)?'rsel':''}">
+      <td class="dom" title="${esc(r.hostname)}">${esc(r.hostname)}</td>
+      <td class="tc2${ha?' on':''}" data-i="${idx}" data-d="tH"><span class="pill ${hc}">${hl}</span></td>
+      <td class="tc2${ia?' on':''}" data-i="${idx}" data-d="chartI" style="font-size:10px;color:var(--muted2);max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span title="${esc(iss)}">${esc(issS||'—')}</span></td>
+      <td style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${exp}</td>
+      <td><div class="pb"><div class="pbo"><div class="pbi" style="width:${bw}%;background:${bc}"></div></div><div class="pbn" style="color:${bc}">${dt}</div></div></td>
+      <td class="tc2${ta?' on':''}" data-i="${idx}" data-d="chartT" style="font-size:10px;font-family:var(--mono);white-space:nowrap"><span style="color:${isTlsSecure(r)?'var(--teal)':'var(--red)'}">${esc(tlv||'—')}</span></td>
+      <td class="tc2${ka?' on':''}" data-i="${idx}" data-d="chartKS" style="font-size:10px;font-family:var(--mono);white-space:nowrap"><span title="${esc(keyLbl)}" style="color:${wkK?'var(--red)':'var(--muted2)'}">${esc(keyShort||'—')}${wkK?' ⚠':''}</span></td>
+      <td class="tc2${ca?' on':''}" data-i="${idx}" data-d="chartCph" style="font-size:9px;font-family:var(--mono);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span title="${esc(cipher)}" style="color:${wkC?'var(--red)':'var(--muted2)'}">${esc(cipherShort||'—')}${wkC?' ⚠':''}</span></td>
+      <td class="tc2${sa?' on':''}" data-i="${idx}" data-d="tS"><span class="pill ${sc}">${esc(st)}</span></td>
+    </tr>`;
+  }).join('');
+
+  updCounter(page.length,totalFiltered,allData.length);
+  renderPagination(currentPage,totalPages);
+}
+
+function renderPagination(cur,total){
+  const nav=el('pgNav');
+  if(!nav)return;
+  if(total<=1){nav.innerHTML='';return;}
+  const maxBtn=7;
+  let pages=[];
+  if(total<=maxBtn){
+    pages=Array.from({length:total},(_,i)=>i);
+  }else{
+    pages=[0];
+    let lo=Math.max(1,cur-2),hi=Math.min(total-2,cur+2);
+    if(lo>1)pages.push('…');
+    for(let i=lo;i<=hi;i++)pages.push(i);
+    if(hi<total-2)pages.push('…');
+    pages.push(total-1);
+  }
+  const btn=(lbl,pg,disabled=false,active=false)=>{
+    const d=disabled?'disabled':'';
+    const cls='pg-nav-btn'+(active?' act':'');
+    return`<button class="${cls}" ${d} onclick="goPage(${pg})">${lbl}</button>`;
+  };
+  let html=btn('‹',cur-1,cur===0)+' ';
+  pages.forEach(p=>{
+    if(p==='…')html+='<span style="color:var(--muted);font-size:10px;padding:0 3px">…</span>';
+    else html+=btn(p+1,p,false,p===cur);
+  });
+  html+=' '+btn('›',cur+1,cur===total-1);
+  nav.innerHTML=html;
+}
+
+document.addEventListener('click',e=>{
+  const td=e.target.closest('td.tc2');if(!td)return;
+  const dim=td.dataset.d,ri=td.dataset.i;if(!dim||ri===undefined)return;
+  const r=rowData[parseInt(ri)];if(!r)return;
+  let v,lb;
+  if(dim==='tH'){v=String(r.hv);lb='HTTPS: '+(r.hv?t('pill_y'):t('pill_n'));}
+  else if(dim==='chartI'){v=r.iss;lb=(LANG==='en'?'Issuer: ':'Emisor: ')+(r.iss.length>18?r.iss.slice(0,18)+'…':r.iss)||'?';}
+  else if(dim==='chartT'){v=r.tlv;lb='TLS: '+(v||'?');}
+  else if(dim==='tS'){v=r.st;lb=(LANG==='en'?'Status: ':'Estado: ')+v;}
+  else if(dim==='chartKS'){v=r.keyLbl;lb='🔑 '+(r.keyLbl||'?');}
+  else if(dim==='chartCph'){v=r.cipher;lb='🔐 '+(r.cipher.length>24?r.cipher.slice(0,24)+'…':r.cipher)||'?';}
+  else return;
+  if(v!==undefined&&v!==null&&v!==''){currentPage=0;setF(dim,v,lb);}
+});
+function renderCompliance(data){
+  if(!data||!data.length)return;
+  const tot=data.length;
+  const h=data.filter(isHttps).length;
+  const errCount=data.filter(hasErr).length;
+  const withCert=data.filter(r=>isHttps(r)&&r.ssl_valid_until);
+  const vig=withCert.filter(r=>{const x=daysLeft(r);return x!==null&&x>exDays;}).length;
+  const exp=withCert.filter(r=>{const x=daysLeft(r);return x!==null&&x>0&&x<=exDays;}).length;
+  const ven=withCert.filter(r=>{const x=daysLeft(r);return x!==null&&x<=0;}).length;
+  const tls12  =data.filter(r=>isHttps(r)&&isTlsSecure(r)).length;
+  const tlsVuln=data.filter(r=>isHttps(r)&&r.tls_version&&!isTlsSecure(r)).length;
+  const wkKey  =data.filter(r=>isHttps(r)&&isWeakKey(r)).length;
+  const wkCph  =data.filter(r=>isHttps(r)&&isWeakCipher(r)).length;
+
+  // ── Six metric ratios — all use h (HTTPS active) as denominator ──
+  // CRITICAL: when h=0 (no active HTTPS), ALL dependent metrics = 0.
+  // Do NOT default inverse metrics to 1 when h=0 — that would give
+  // unearned score for cert/TLS/key/cipher even with zero active sites.
+  const httpsRatio = tot>0 ? h/tot : 0;            // Metric 1: HTTPS connectivity
+  const vigRatio   = h>0  ? vig/h  : 0;            // Metric 2: valid certs         (0 when no active)
+  const expRatio   = h>0  ? 1-(exp/h) : 0;         // Metric 3: inverse expiring     (0 when no active)
+  const tlsRatio   = h>0  ? 1-(tlsVuln/h) : 0;    // Metric 4: inverse WEAK TLS     (0 when no active)
+  const keyRatio   = h>0  ? 1-(wkKey/h) : 0;       // Metric 5: inverse weak keys    (0 when no active)
+  const cphRatio   = h>0  ? 1-(wkCph/h) : 0;       // Metric 6: inverse weak ciphers (0 when no active)
+
+  // ── Weighted score — only valid when weights sum to 100 ──
+  const sumW=wH+wC+wE+wT+wK+wP;
+  const weightsOK=sumW===100;
+  let score=0;
+  if(weightsOK){
+    score=(httpsRatio*(wH/100))+(vigRatio*(wC/100))+(expRatio*(wE/100))
+         +(tlsRatio*(wT/100))+(keyRatio*(wK/100))+(cphRatio*(wP/100));
+    score=Math.min(1,Math.max(0,score))*100;
+  }
+
+  // ── Grade ──
+  let grade,gcls,gtitle;
+  if(!weightsOK){
+    grade='N/A';gcls='gd';
+    gtitle=LANG==='en'?'⚠️ Weights must sum to 100%':'⚠️ Los pesos deben sumar 100%';
+  } else if(score>=gtA){grade='A';gcls='ga';gtitle=t('grade_a');}
+  else if(score>=gtB) {grade='B';gcls='gb';gtitle=t('grade_b');}
+  else if(score>=gtC) {grade='C';gcls='gc';gtitle=t('grade_c');}
+  else                {grade='D';gcls='gd';gtitle=t('grade_d');}
+
+  el('cbadge').textContent=grade;
+  el('cbadge').className='cbadge '+gcls;
+  el('cbadge').style.fontSize=weightsOK?'':'12px';
+  el('ctitle').textContent=gtitle+' — '+t('c_title');
+
+  // ── % values ──
+  const httpsP =Math.round(httpsRatio*100);
+  const vigP   =h>0?Math.round(vig/h*100):0;
+  const expP   =h>0?Math.round(exp/h*100):0;
+  const venP   =h>0?Math.round(ven/h*100):0;
+  const tlsSecP=h>0?Math.round(tls12/h*100):0;       // % with SECURE TLS (for info)
+  const tlsVP  =h>0?Math.round(tlsVuln/h*100):0;     // % with VULNERABLE TLS (shown in KPI/pill)
+  const wkKP   =h>0?Math.round(wkKey/h*100):0;
+  const wkCP   =h>0?Math.round(wkCph/h*100):0;
+
+  // ── Narrative ──
+  let txt=t('cn_h',{h,tot,p:httpsP});
+  txt+=errCount?t('cn_ey',{n:errCount}):t('cn_en');
+  txt+=ven>0?t('cn_vy',{n:ven}):t('no_exp')+' ';
+  if(exp>0)txt+=t('cn_xy',{n:exp,d:exDays});
+  if(tlsVuln>0){
+    const vulnVers=[...new Set(data.filter(r=>isHttps(r)&&r.tls_version&&!isTlsSecure(r)).map(r=>r.tls_version))].join(', ');
+    txt+=t('cn_w',{n:tlsVuln})+` (${vulnVers}) `;
+  }
+  if(wkKey>0){
+    const wkTypes=[...new Set(data.filter(r=>isHttps(r)&&isWeakKey(r)).map(r=>{
+      const algo=r.ssl_key_algorithm||'?';
+      const bits=r.ssl_key_size_bits||'?';
+      return algo+(bits&&bits!=='?'?' '+bits+'b':'');
+    }))].join(', ');
+    txt+=t('cn_wkkey',{n:wkKey})+` (${wkTypes}) `;
+  }
+  if(wkCph>0){
+    const wkSuites=[...new Set(data.filter(r=>isHttps(r)&&isWeakCipher(r)).map(r=>r.ssl_cipher_suite||'?'))].slice(0,3).join(', ');
+    txt+=t('cn_wkcph',{n:wkCph})+`(${wkSuites}${wkCph>3?'…':''}) `;
+  }
+  el('ctext').textContent=txt.trim();
+
+  // ── Pills ──
+  // ── Pills ──
+  const pills=[];
+  pills.push(`<span class="cp cp-ok">✓ ${httpsP}% HTTPS (${h}/${tot})</span>`);
+  if(errCount>0)pills.push(`<span class="cp cp-b">✗ ${errCount} ${t('cp_err')}</span>`);
+  if(ven>0) pills.push(`<span class="cp cp-b">⛔ ${venP}% ${t('cp_ven')} (${ven})</span>`);
+  else      pills.push(`<span class="cp cp-ok">✓ ${t('no_exp').replace('.','')}</span>`);
+  if(exp>0) pills.push(`<span class="cp cp-w">⚠ ${expP}% ${t('cp_exp')} (${exp})</span>`);
+  if(vig>0) pills.push(`<span class="cp cp-ok">● ${vigP}% ${t('cp_vig')} (${vig})</span>`);
+  // TLS pill — show VULNERABLE count (bad metric — higher = worse)
+  if(tlsVuln>0){
+    pills.push(`<span class="cp cp-b">🔓 ${tlsVP}% ${t('cp_tls')} (${tlsVuln}/${h})</span>`);
+  } else {
+    pills.push(`<span class="cp cp-ok">✓ ${LANG==='en'?'No vulnerable TLS':'Sin TLS vulnerable'} (${tlsSecP}% ≥1.2)</span>`);
+  }
+  if(wkKey>0) pills.push(`<span class="cp cp-b">🔑 ${wkKP}% ${t('cp_wkkey')} (${wkKey})</span>`);
+  else        pills.push(`<span class="cp cp-ok">✓ ${LANG==='en'?'No weak keys':'Sin claves débiles'}</span>`);
+  if(wkCph>0) pills.push(`<span class="cp cp-b">🔐 ${wkCP}% ${t('cp_wkcph')} (${wkCph})</span>`);
+  else        pills.push(`<span class="cp cp-ok">✓ ${LANG==='en'?'No weak ciphers':'Sin cifrados débiles'}</span>`);
+  pills.push(`<span class="cp ${weightsOK?'cp-i':'cp-b'}">Score: ${weightsOK?Math.round(score)+'/100':'N/A'}</span>`);
+  pills.push(`<span class="cp cp-i" style="opacity:.7">${LANG==='en'?'Thresholds:':'Umbrales:'} A≥${gtA} B≥${gtB} C≥${gtC}</span>`);
+  el('cpills').innerHTML=pills.join('');
+
+  // ── Slider hints (sync with updateWeightUI) ──
+  const ofAct=LANG==='en'?'% of active':'% del activo';
+  el('wHMetric').textContent=`${httpsP}% ${LANG==='en'?'of total':'del total'} — ${h}/${tot}`;
+  el('wCMetric').textContent=`${vigP}% ${ofAct} — ${vig}/${h}`;
+  el('wEMetric').textContent=`${expP}% ${ofAct} — ${exp}/${h}`;
+  el('wTMetric').textContent=`${tlsVP}% ${ofAct} — ${tlsVuln}/${h} ${LANG==='en'?'(vulnerable)':'(vulnerables)'}`;
+  el('wKMetric').textContent=`${wkKP}% ${ofAct} — ${wkKey}/${h}`;
+  el('wPMetric').textContent=`${wkCP}% ${ofAct} — ${wkCph}/${h}`;
+}
+
+/* ══ SERVER ═══════════════════════════════════ */
+async function checkSvr(){
+  const dot=el('svrDot'),lbl=el('svrLbl');
+  dot.className='dot chk';lbl.textContent=t('svr_chk');
+  // Try current SERVER first (fast path on repeat checks)
+  try{
+    const r=await fetch(SERVER+'/ping',{signal:AbortSignal.timeout(2000)});
+    if(r.ok){dot.className='dot on';lbl.textContent=t('svr_ok')+'  :'+SERVER.split(':')[2];el('sWarn').classList.remove('show');return true;}
+  }catch(e){}
+  // Scan all candidate ports to find whichever one the backend picked
+  for(const port of CANDIDATE_PORTS){
+    const base='http://localhost:'+port;
+    if(base===SERVER)continue; // already tried above
+    try{
+      const r=await fetch(base+'/ping',{signal:AbortSignal.timeout(1500)});
+      if(r.ok){
+        SERVER=base;
+        dot.className='dot on';lbl.textContent=t('svr_ok')+'  :'+port;
+        el('sWarn').classList.remove('show');
+        return true;
+      }
+    }catch(e){}
+  }
+  dot.className='dot off';lbl.textContent=t('svr_off');el('sWarn').classList.add('show');return false;
+}
+
+/* ══ EXPORT ═══════════════════════════════════ */
+function exportCSV(){
+  if(!curCsv){alert('No CSV data available.');return;}
+  const ts=new Date().toISOString().replace(/[-T:]/g,'').slice(0,14);
+  const blob=new Blob([curCsv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='report_http_ssl_'+ts+'.csv';
+  a.click();URL.revokeObjectURL(url);
+}
+function exportPDF(){window.print();}
+
+/* ══ MODAL ════════════════════════════════════ */
+function showModal(csv,fn,total,ok,fail){
+  pendingCsv=csv;pendingFn=fn;
+  el('mtitle').textContent=t('modal_t');el('msub').textContent=t('modal_s');el('btnMCont').textContent=t('modal_cont');
+  el('mstats').innerHTML=`<div class="mstat"><div class="msv" style="color:var(--blue)">${total}</div><div class="msl">${t('modal_total')}</div></div><div class="mstat"><div class="msv" style="color:var(--green)">${ok}</div><div class="msl">${t('modal_ok')}</div></div><div class="mstat"><div class="msv" style="color:var(--red)">${fail}</div><div class="msl">${t('modal_fail')}</div></div>`;
+  el('modal').classList.add('show');
+}
+function closeModal(){
+  el('modal').classList.remove('show');
+  if(pendingCsv){try{const d=parseCSV(pendingCsv);curCsv=pendingCsv;loadData(d,pendingFn);}catch(e){alert('CSV parse error: '+e.message);}pendingCsv=null;pendingFn=null;}
+}
+
+/* ══ DATA ═════════════════════════════════════ */
+function parseCSV(txt){
+  const lines=txt.trim().split(/\r?\n/);if(lines.length<2)throw new Error('Empty CSV');
+  const hdrs=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/^"|"$/g,''));
+  if(!hdrs.includes('hostname'))throw new Error('No hostname field');
+  return lines.slice(1).filter(l=>l.trim()).map(line=>{
+    const vals=[];let cur='',inQ=false;
+    for(const c of line){if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=c;}
+    vals.push(cur.trim());const o={};hdrs.forEach((h,i)=>o[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());return o;
+  });
+}
+function loadData(data,filename){
+  // Destroy any existing charts before replacing data to prevent "not a function" errors
+  destAll();
+  allData=data;filters.clear();flabels.clear();
+  currentPage=0;pageSize=10;
+  // Reset page-size buttons
+  document.querySelectorAll('.pg-btn').forEach(b=>{
+    const v=b.id==='pgAll'?0:parseInt(b.textContent)||0;
+    b.classList.toggle('act',v===10);
+  });
+  el('fbadge').textContent='📄 '+filename;el('fbadge').style.display='inline-block';
+  el('landing').style.display='none';el('dash').style.display='block';
+  el('btnNew').style.display='inline-flex';el('btnECSV').style.display='inline-flex';el('btnEPDF').style.display='inline-flex';
+  el('dFile').textContent=filename;el('dMeta').textContent='· '+data.length+' '+t('domains');
+  el('si1').value='';el('si2').value='';
+  document.querySelectorAll('.kcard').forEach(c=>c.classList.remove('act'));
+  updFBar();
+  // Use setTimeout to ensure dash is visible before Chart.js renders into canvases
+  setTimeout(()=>refresh(),0);
+}
+function onCsvFile(f){if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=parseCSV(ev.target.result);curCsv=ev.target.result;loadData(d,f.name);}catch(e){alert('Error: '+e.message);}};rd.readAsText(f,'UTF-8');}
+function onTxtFile(f){if(!f)return;const rd=new FileReader();rd.onload=ev=>{el('sitesTA').value=ev.target.result;const fn=el('txtFN');fn.textContent='📄 '+f.name;fn.style.display='block';};rd.readAsText(f,'UTF-8');}
+function goLanding(){
+  el('landing').style.display='flex';el('dash').style.display='none';
+  el('btnNew').style.display='none';el('btnECSV').style.display='none';el('btnEPDF').style.display='none';
+  el('fbadge').style.display='none';el('fbar').classList.remove('show');el('scanProg').classList.remove('show');
+}
+function setMode(m){
+  el('tabScan').classList.toggle('act',m==='scan');el('tabCSV').classList.toggle('act',m==='csv');
+  el('pScan').classList.toggle('show',m==='scan');el('pCSV').classList.toggle('show',m==='csv');
+}
+
+/* ══ SCAN SSE ═════════════════════════════════ */
+// Append one line to the log box as its own <div>
+function logL(html,indent){
+  const b=el('logBox');
+  const d=document.createElement('div');
+  if(indent)d.style.paddingLeft='2em';
+  d.innerHTML=html||'&nbsp;';
+  b.appendChild(d);
+  b.scrollTop=b.scrollHeight;
+}
+
+// Strip ANSI escape codes only
+function stripA(s){return(s||'').replace(/\x1b\[[0-9;]*m/g,'');}
+
+// Parse one backend log line into the lbox
+function parseLL(raw){
+  const b=el('logBox');
+  // Remove ANSI codes; do NOT trim — keep leading spaces for detection
+  const line=stripA(raw);
+
+  // ── Site header "[N/M]  hostname" — may have leading \n whitespace ─────────
+  const hdrM=line.match(/\[(\d+\/\d+)\]\s{1,4}(\S[^\r\n]*)/);
+  if(hdrM){
+    if(b.children.length>0) logL(''); // blank line between sites
+    logL(`<span class="lhead">[${esc(hdrM[1])}]&nbsp;&nbsp;${esc(hdrM[2].trim())}</span>`);
+    return;
+  }
+
+  // Trim whitespace; after trimming the line starts with ✔/✘ + spaces + LABEL
+  const s=line.trim();
+  if(!s)return;
+
+  // Detect ok/fail and strip the leading symbol
+  const isOk=s.charCodeAt(0)===0x2714||s.startsWith('✓')||s.startsWith('●');
+  const payload=s.replace(/^[✔✘✓✗×●◆]\s*/,'').trim();
+
+  if(/^TCP\s+port.*open/i.test(payload)){
+    logL(`<span class="lok">✔&nbsp;&nbsp;TCP&nbsp;&nbsp;&nbsp;${esc(payload.replace(/^TCP\s+/i,''))}</span>`,true);
+  }
+  else if(/^TCP\s+/i.test(payload)){
+    logL(`<span class="lfail">✘&nbsp;&nbsp;TCP&nbsp;&nbsp;&nbsp;${esc(payload.replace(/^TCP\s+/i,''))}</span>`,true);
+  }
+  else if(/^TLS\s+handshake\s+OK/i.test(payload)){
+    const m=payload.match(/\[([^\]]+)\]/);
+    logL(`<span class="lok">✔&nbsp;&nbsp;TLS&nbsp;&nbsp;&nbsp;handshake OK&nbsp;&nbsp;${esc(m?'['+m[1]+']':'')}</span>`,true);
+  }
+  else if(/^TLS\s+handshake\s+fail/i.test(payload)){
+    logL(`<span class="lfail">✘&nbsp;&nbsp;TLS&nbsp;&nbsp;&nbsp;handshake failed</span>`,true);
+  }
+  else if(/^CERT\s+/i.test(payload)){
+    logL(`<span class="lcert">✔&nbsp;&nbsp;CERT&nbsp;&nbsp;${esc(payload.replace(/^CERT\s+/i,''))}</span>`,true);
+  }
+  else if(/^KEY\s+/i.test(payload)){
+    logL(`<span class="lcert">✔&nbsp;&nbsp;KEY&nbsp;&nbsp;&nbsp;${esc(payload.replace(/^KEY\s+/i,''))}</span>`,true);
+  }
+  else if(/^CIPH\s+/i.test(payload)){
+    logL(`<span class="lcert">✔&nbsp;&nbsp;CIPH&nbsp;&nbsp;${esc(payload.replace(/^CIPH\s+/i,''))}</span>`,true);
+  }
+  else if(/^HTTP\s+/i.test(payload)){
+    const ok=!/TIMEOUT|REFUSED|ERROR/i.test(payload);
+    logL(`<span class="${ok?'lok':'lfail'}">${ok?'✔':'✘'}&nbsp;&nbsp;HTTP&nbsp;&nbsp;${esc(payload.replace(/^HTTP\s+/i,''))}</span>`,true);
+  }
+  else if(s){
+    logL(`<span class="lmuted">${esc(s)}</span>`);
+  }
+}
+// Live detail card — compact chips showing current site status
+function showDC(host,idx,total){
+  el('dcHost').textContent='['+idx+'/'+total+']  '+host;
+  el('dcChecks').innerHTML='<span class="dck dck-wait">⏳ scanning…</span>';
+  el('dcCard').classList.add('show');
+}
+function updDC(raw){
+  const c=stripA(raw).replace(/^\s+[✔✘]\s{1,3}/,'').trim();
+  if(!c)return;
+  const ch=el('dcChecks');
+  const add=(cls,lbl)=>{
+    const w=ch.querySelector('.dck-wait');if(w)w.remove();
+    const sp=document.createElement('span');sp.className='dck '+cls;
+    sp.textContent=lbl;ch.appendChild(sp);
+  };
+  if(/^TCP.*open/i.test(c))                       add('dck-ok','✔ TCP');
+  else if(/^TCP/i.test(c))                         add('dck-fail','✘ TCP');
+  else if(/^TLS.*handshake OK/i.test(c)){const m=c.match(/\[([^\]]+)\]/);add('dck-ok','✔ '+(m?m[1]:'TLS'));}
+  else if(/^TLS.*failed/i.test(c))                 add('dck-fail','✘ TLS');
+  else if(/^CERT/i.test(c)){const m=c.match(/CN=(\S+)/);add('dck-cert','✔ '+(m?m[1]:'CERT').slice(0,20));}
+  else if(/^KEY/i.test(c))                         add('dck-cert','🔑 '+c.replace(/^KEY\s*/i,'').slice(0,18));
+  else if(/^CIPH/i.test(c))                        add('dck-cert','🔐 '+c.replace(/^CIPH\s*/i,'').slice(0,22));
+  else if(/^HTTP.*→/i.test(c)){const ok=!/TIMEOUT|REFUSED|ERROR/i.test(c);const m=c.match(/→\s*(.+)/);add(ok?'dck-ok':'dck-fail',(ok?'✔ ':'✘ ')+'HTTP '+(m?m[1].slice(0,14):''));}
+}
+async function startScan(){
+  const sites=el('sitesTA').value.trim();
+  if(!sites){alert(LANG==='en'?'Enter at least one domain.':'Ingresa al menos un dominio.');return;}
+  const ok=await checkSvr();if(!ok)return;
+  const totalSites=sites.split('\n').filter(s=>s.trim()&&!s.trim().startsWith('#')).length;
+  const prog=el('scanProg');prog.classList.add('show');
+  el('logBox').innerHTML='';el('dcCard').classList.remove('show');
+  el('scanBar').style.width='0%';el('scanPct').textContent='0%';
+  el('scanLbl').textContent=t('scanning');el('scanCnt').textContent='';
+  el('btnScan').disabled=true;el('btnScan').textContent='⏳…';
+  logL(`<span class="linfo">→ Sending ${totalSites} site(s) to backend...</span>`);
+  let okCnt=0,failCnt=0,finalCsv=null,finalFn=null;
+  try{
+    const sr=await fetch(SERVER+'/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sites}),signal:AbortSignal.timeout(10000)});
+    if(!sr.ok){const e=await sr.json();throw new Error(e.error||'Failed to start scan');}
+    const {scan_id}=await sr.json();
+    await new Promise((res,rej)=>{
+      const es=new EventSource(`${SERVER}/stream/${scan_id}`);
+      es.onmessage=ev=>{
+        if(ev.data==='[DONE]'||ev.data==='[TIMEOUT]'){es.close();res();return;}
+        let p;try{p=JSON.parse(ev.data);}catch{return;}
+        if(p.type==='progress'){
+          el('scanBar').style.width=p.pct+'%';el('scanPct').textContent=p.pct+'%';
+          el('scanLbl').textContent=t('scanning')+' ['+p.done+'/'+p.total+']';
+          el('scanCnt').textContent='✓ '+okCnt+'  ✗ '+failCnt+'  / '+totalSites;
+          // Update the live card header for the NEXT site being started
+          showDC(p.current,p.done,p.total);
+        }else if(p.type==='log'){
+          const line=p.line||'';
+          // Feed log lines to both the detail card chips and the log box
+          updDC(line);
+          parseLL(line);
+          // Count OK / FAIL from HTTP and TCP lines
+          if(/HTTP.*→.*\b(200|201|202|204|206|301|302|303|307|308|400|401|403|404)\b/i.test(line))okCnt++;
+          else if(/HTTP.*→/i.test(line)&&!/TIMEOUT|REFUSED|ERROR/i.test(line))okCnt++;
+          if(/TCP.*closed|unreachable|CONNECTION_REFUSED/i.test(line))failCnt++;
+          el('scanCnt').textContent='✓ '+okCnt+'  ✗ '+failCnt+'  / '+totalSites;
+        }else if(p.type==='done'){finalCsv=p.csv;finalFn=p.csv_filename;okCnt=p.ok;failCnt=p.fail;es.close();res();}
+      };
+      es.onerror=()=>{es.close();rej(new Error('SSE connection lost'));};
+    });
+    if(finalCsv){
+      el('scanBar').style.width='100%';el('scanPct').textContent='100%';
+      el('scanLbl').textContent=t('scan_done');
+      el('scanCnt').textContent='✓ '+okCnt+'  ✗ '+failCnt+'  / '+totalSites;
+      logL(`<span class="lok">✔ Report saved: ${esc(finalFn)}</span>`);
+      curCsv=finalCsv;showModal(finalCsv,finalFn,totalSites,okCnt,failCnt);
+    }else{
+      logL(`<span class="lwarn">→ ${t('scan_fb')}</span>`);
+      const r2=await fetch(SERVER+'/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sites}),signal:AbortSignal.timeout(360000)});
+      const res2=await r2.json();if(res2.error)throw new Error(res2.error);
+      curCsv=res2.csv;const pd=parseCSV(res2.csv);
+      showModal(res2.csv,res2.csv_filename,pd.length,pd.filter(r=>r.https_active==='TRUE').length,pd.filter(r=>r.https_active!=='TRUE').length);
+    }
+  }catch(err){logL(`<span class="lfail">✘ ${esc(String(err))}</span>`);el('scanLbl').textContent=t('scan_err');}
+  finally{el('btnScan').disabled=false;el('btnScan').textContent=t('btn_scan');}
+}
+
+/* ══ DROP & FILE INPUTS ══════════════════════ */
+function drp(id,fn,ext){
+  const z=el(id);
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
+  z.addEventListener('dragleave',()=>z.classList.remove('over'));
+  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');const f=e.dataTransfer.files[0];if(f&&(!ext||f.name.toLowerCase().endsWith(ext)))fn(f);});
+}
+drp('txtDrop',onTxtFile,'.txt');drp('csvDrop',onCsvFile,'.csv');
+el('csvInp').addEventListener('change',function(e){const f=e.target.files[0];if(f)onCsvFile(f);this.value='';});
+el('csvPick').addEventListener('change',function(e){const f=e.target.files[0];if(f)onCsvFile(f);this.value='';});
+
+/* ══ INIT ════════════════════════════════════ */
+applyLang();
+updateGTUI();
+checkSvr();
+setInterval(checkSvr,15000);
+</script>
+</body>
+</html>

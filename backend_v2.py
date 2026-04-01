@@ -383,15 +383,21 @@ def process_entry(
     cipher   = ssl_info.get("ssl_cipher_suite", "")
 
     if tls_ver:
-        emit(f"        {ok_str(f'TLS   handshake OK  [{tls_ver}  {cipher}]')}")
+        # Line 2: TLS version only
+        emit(f"        {ok_str(f'TLS   handshake OK  [{tls_ver}]')}")
         cn     = ssl_info.get("ssl_common_name", "")
         issuer = ssl_info.get("ssl_issuer", "")
         since  = ssl_info.get("ssl_valid_from", "")
         until  = ssl_info.get("ssl_valid_until", "")
         algo   = ssl_info.get("ssl_key_algorithm", "")
         bits   = ssl_info.get("ssl_key_size_bits", "")
-        cert_line = f"CN={cn}  Issuer={issuer}  Valid={since} / {until}  {algo} {bits} bits"
-        emit(f"        {ok_str(f'CERT  {cert_line}')}")
+        # Line 3: Certificate (CN + Issuer + validity dates)
+        emit(f"        {ok_str(f'CERT  CN={cn}  Issuer={issuer}  Valid={since} / {until}')}")
+        # Line 4: Key algorithm + size (separate from cert)
+        key_desc = f"{algo} {bits} bits" if bits else algo
+        emit(f"        {ok_str(f'KEY   {key_desc}')}")
+        # Line 5: Cipher suite (separate line)
+        emit(f"        {ok_str(f'CIPH  {cipher}')}")
     else:
         emit(f"        {fail_str('TLS   handshake failed')}")
 
@@ -401,14 +407,15 @@ def process_entry(
     )
 
     if https_active:
-        emit(f"        {ok_str(f'HTTP  -> {https_code} {https_text}')}")
+        # Line 6: HTTP response
+        emit(f"        {ok_str(f'HTTP  → {https_code} {https_text}')}")
         row["https_active"]      = "TRUE"
         row["https_status_code"] = https_code
         row["https_status_text"] = https_text
         if tls_ver:
             row.update(ssl_info)
     else:
-        emit(f"        {fail_str(f'HTTP  -> {error_type}')}")
+        emit(f"        {fail_str(f'HTTP  → {error_type}')}")
         row["https_active"] = "FALSE"
         row["error_type"]   = error_type
 
@@ -443,14 +450,20 @@ def run_scan_in_thread(
     for idx, entry in enumerate(entries, start=1):
         row = process_entry(idx, total, entry, log_queue=log_q)
         results.append(row)
-        # Send structured progress event
+        # Send structured progress event — include crypto fields for live dashboard display
         progress_pct = round(idx / total * 100)
         log_q.put(json.dumps({
-            "type":    "progress",
-            "done":    idx,
-            "total":   total,
-            "pct":     progress_pct,
-            "current": entry["original"],
+            "type":          "progress",
+            "done":          idx,
+            "total":         total,
+            "pct":           progress_pct,
+            "current":       entry["original"],
+            "https_active":  row.get("https_active", ""),
+            "tls_version":   row.get("tls_version", ""),
+            "cipher_suite":  row.get("ssl_cipher_suite", ""),
+            "key_algorithm": row.get("ssl_key_algorithm", ""),
+            "key_size_bits": row.get("ssl_key_size_bits", ""),
+            "error_type":    row.get("error_type", ""),
         }))
 
     # Ensure reports directory exists (may have been deleted after startup)
