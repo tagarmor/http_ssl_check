@@ -49,7 +49,7 @@ Plataformas soportadas: Windows, Linux (Kali), Raspberry Pi OS, macOS
 Compatibilidad Python: 3.9 a 3.14
 
 
-### 2. backend_v2.py — Servidor API Flask Local
+### 2. backend.py — Servidor API Flask Local
 
 Servidor REST local que expone la lógica de escaneo por HTTP, permitiendo
 al dashboard disparar y monitorear escaneos en tiempo real.
@@ -70,24 +70,24 @@ Endpoints REST:
   POST /run                  Endpoint síncrono legado (compatibilidad hacia atrás)
 
 Comando de inicio:
-  python backend_v2.py
+  python backend.py
 
 Dependencias:
   pip install flask flask-cors requests cryptography
 
 
-### 3. dashboard_https_ssl_v5.html — Dashboard Interactivo
+### 3. dashboard_https_ssl.html — Dashboard Interactivo
 
 Archivo HTML único y autocontenido. Sin instalación, sin pasos de compilación.
 
 Modos de uso:
-  a) Modo online: abrir el archivo en el navegador mientras backend_v2.py
+  a) Modo online: abrir el archivo en el navegador mientras backend.py
      está en ejecución. El dashboard se conecta al backend, acepta una lista
      de dominios, dispara el escaneo y transmite el progreso línea a línea
      mediante SSE.
 
   b) Modo offline / standalone: abrir el archivo directamente en el navegador
-     y cargar un reporte CSV previamente generado por certs.py o backend_v2.py.
+     y cargar un reporte CSV previamente generado por certs.py o backend.py.
      Visualización completa sin necesidad de backend.
 
 Funcionalidades:
@@ -186,7 +186,7 @@ mantener los datos sin ambigüedad.
   6. El reporte se encuentra en:
        ./reports/report_http_ssl_<marca_de_tiempo>.csv
 
-  7. Opcional: abrir dashboard_https_ssl_v5.html en el navegador y cargar
+  7. Opcional: abrir dashboard_https_ssl.html en el navegador y cargar
      el CSV generado para visualización.
 
 
@@ -196,12 +196,12 @@ mantener los datos sin ambigüedad.
        pip install flask flask-cors requests cryptography
 
   2. Iniciar el backend:
-       python backend_v2.py
+       python backend.py
 
      La terminal mostrará el puerto seleccionado, por ejemplo:
        * Running on http://127.0.0.1:5151
 
-  3. Abrir dashboard_https_ssl_v5.html en Chrome, Edge o Firefox.
+  3. Abrir dashboard_https_ssl.html en Chrome, Edge o Firefox.
 
   4. Configurar la URL del backend en los ajustes del dashboard si es
      necesario (el valor por defecto es http://localhost:5151).
@@ -215,11 +215,11 @@ mantener los datos sin ambigüedad.
 
 ### Modo C — Dashboard offline (cargar reporte existente)
 
-  1. Abrir dashboard_https_ssl_v5.html directamente en el navegador
+  1. Abrir dashboard_https_ssl.html directamente en el navegador
      (no se requiere backend).
 
   2. Hacer clic en "Cargar Reporte CSV" y seleccionar un archivo CSV
-     previamente generado por certs.py o backend_v2.py.
+     previamente generado por certs.py o backend.py.
 
   3. Los KPIs, gráficas y tabla de dominios se populan de inmediato.
 
@@ -279,15 +279,15 @@ directamente en la interfaz del dashboard.
     con timezone UTC). Ambas APIs se detectan y manejan automáticamente al
     importar.
   - Python 3.14 requiere importación explícita de importlib.util; esto está
-    contemplado en backend_v2.py.
+    contemplado en backend.py.
 
 ---
 
 ## Estructura del Proyecto
 
   certs.py                    Script de escaneo standalone
-  backend_v2.py               Servidor API Flask + motor de escaneo
-  dashboard_https_ssl_v5.html Dashboard interactivo (archivo HTML único)
+  backend.py               Servidor API Flask + motor de escaneo
+  dashboard_https_ssl.html Dashboard interactivo (archivo HTML único)
   reports/                    Directorio de salida (se crea automáticamente)
     report_http_ssl_<ts>.csv  Reportes de escaneo con marca de tiempo
 
